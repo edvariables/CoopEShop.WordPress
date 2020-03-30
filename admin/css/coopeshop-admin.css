@@ -1,0 +1,41 @@
+/**
+ * ED20200326
+ * Feuille de styles pour CoopEShop mode Admin
+ */
+
+.coop-metabox-row > label {
+	min-width: 12em;
+	display: inline-block;
+	vertical-align: top;
+	margin-top: 8px;
+}
+.coop-metabox-row > input, 
+.coop-metabox-row > textarea {
+	width: 25em;
+	display: inline-block;
+}
+.coop-metabox-row.side-box > input, 
+.coop-metabox-row.side-box > textarea {
+	width: 12em;
+}
+.coop-metabox-row > input[type="number"] {
+	width: 4em;	
+}
+.coop-metabox-row.is_not_super_admin.super_admin_only {
+	display: none;
+}
+
+.coop-metabox-row.coop-metabox-subfields {
+	display: inline;
+	margin-left: 1em;
+}
+
+/* as other inputs */
+input[type="gps"] {
+	padding: 0 8px;
+	line-height: 2;
+	min-height: 30px;
+    box-shadow: 0 0 0 transparent;
+    border-radius: 4px;
+    border: 1px solid #7e8993;
+}

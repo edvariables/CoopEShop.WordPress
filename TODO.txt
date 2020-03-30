@@ -1,0 +1,28 @@
+TODO list
+
+Multisite
+
+https://developer.wordpress.org/plugins/security/
+
+Mieux gérer les installations et activations de plugin pour les registers des post-types et taxonomies qui sont, à l'heure actuelle, systématiques.
+
+Refaire regenerate_menu sur la base du champ menu_order
+Menu hiérarchique par type de fournisseur
+
+Au dessus du titre d'une page de fournisseur, ajouter auteur et date, comme pour un article.
+	cf \wp-content\themes\twentyseventeen\template-parts\post:26 calls twentyseventeen_posted_on();
+
+Admin menu cf //TODO tags (list admin users ids en filtre de WP_Query)
+
+Créer un rôle author-fournisseur
+
+A la création d'un nouveau site, création 1er fournisseur (pour modèle), on ne voit pas le Content editor qui serait pourtant utile pour les copier-coller de mise en place.
+Tester la duplication du site wp.coopeshop.net.
+
+in Contact Form 7, try [recaptcha]
+
+Synchroniser les documentations depuis le site wp.coopeshop.net.
+
+Publish plugin sur WordPress.org/plugins
+	https://wordpress.org/plugins/developers/add/
+	account manud07

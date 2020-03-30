@@ -1,0 +1,79 @@
+/**
+ * ED20200326
+ * Feuille de styles pour CoopEShop
+ */
+
+/* ED200318 "Fièrement propulsé par Word Press" */
+.site-info > a
+, .masquer
+{ display: none; }
+
+.coop-error-light {
+  font-size: smaller;
+  color: gray;
+  padding: 5px;
+  text-align: center;
+}
+
+.entry-content .coop-fournisseur-texte-intro,
+.entry-content .coop-fournisseur-texte-fin {
+	
+}
+.entry-content .coop-fournisseur-catalogue {
+	font-weight : bold;
+}
+
+.entry-content .coop-fournisseur {
+	white-space: pre-line;
+	margin-bottom: 1.5em;
+}
+.entry-content .coop-fournisseur-bon-commande {
+	white-space: nowrap;
+}
+
+.entry-content .coop-fournisseur-details {
+	background-color: #f7f7f7;
+	border-color: #9fa4a6;
+	border-style: solid;
+	border-width: thin;
+	color: #333;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	padding: 1em;	
+}
+
+/*toggle shortcode*/
+.toggle-trigger {
+	margin: 0px !important;
+	font-size: 18px;
+	padding: 10px;
+	padding-left: 30px;
+	background-color: #F5F5F5;
+	background-image: url('../images/toggle-plus.png');
+	background-position: 10px center;
+	background-repeat: no-repeat;
+}
+
+.toggle-trigger a {
+	color: #333;
+	text-decoration: none;
+	display: block;
+}
+
+.toggle-trigger a:hover {
+	color: #0489B7;
+	text-decoration: underline;
+}
+
+.toggle-trigger.active{
+	background-image: url('../images/toggle-minus.png') !important;
+	background-position: 10px center;
+	background-repeat: no-repeat;
+}
+
+.toggle_container {
+	overflow: hidden;
+	padding: 20px 10px;
+}
+
