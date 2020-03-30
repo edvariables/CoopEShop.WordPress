@@ -33,6 +33,9 @@ class CoopEShop_Admin_Fournisseur {
 	public static function new_post_fournisseur_cb ($post_id, $post, $update){
 
 		if($update){
+			if(basename($_SERVER['PHP_SELF']) == 'admin-ajax.php')
+				return;
+
 			CoopEShop_Admin_Fournisseur_Menu::manage_menu_integration($post_id, $post, $is_update);
 		}
 

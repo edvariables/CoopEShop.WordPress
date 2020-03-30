@@ -133,7 +133,6 @@ class CoopEShop_Admin_Fournisseur_Menu {
 	 TODO refaire sans supprimer/recréer mais en modifiant post->menu_order
 	 */
 	public static function regenerate_menu(){
-
 		$menu = self::get_integration_menu();
 		$menu_items = wp_get_nav_menu_items($menu->term_id);
 
@@ -163,7 +162,6 @@ class CoopEShop_Admin_Fournisseur_Menu {
 		// Add menu items
 		$menu_item_position = count($menu_items_before) + 1;
 		foreach($posts as $post_id => $post){
-			echo ' '. $post->post_title;
 			$itemData =  array(
 				'menu-item-object-id' => $post->ID,
 				'menu-item-parent-id' => 0,

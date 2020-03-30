@@ -59,7 +59,6 @@ class CoopEShop_Fournisseur {
 	 * A ce stade, les metaboxes ne sont pas encore sauvegardées
 	 */
 	public static function create_user_on_save ($post_id, $post, $is_update){
-			
 		$email = array_key_exists('f-email', $_POST) ? $_POST['f-email'] : false;
 		if(!$email || !is_email($email)) {
 			show_message("Il manque l'adresse mail ou elle est incorrecte.");
