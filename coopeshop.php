@@ -17,7 +17,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'COOPESHOP_VERSION', '1.0.2' );
+define( 'COOPESHOP_VERSION', '1.0.4' );
 define( 'COOPESHOP_MINIMUM_WP_VERSION', '4.0' );
 
 define( 'COOPESHOP_PLUGIN', __FILE__ );
@@ -28,6 +28,7 @@ define( 'COOPESHOP_PLUGIN_MODULES_DIR', COOPESHOP_PLUGIN_DIR . '/modules' );
 
 define( 'COOPESHOP_TAG', strtolower(COOPESHOP_PLUGIN_NAME) ); //coopeshop
 
+require_once( COOPESHOP_PLUGIN_DIR . '/includes/functions.php' );
 require_once( COOPESHOP_PLUGIN_DIR . '/public/class.coopeshop.php' );
 
 //plugin_activation

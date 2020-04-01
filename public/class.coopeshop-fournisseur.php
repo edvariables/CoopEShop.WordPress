@@ -36,6 +36,7 @@ class CoopEShop_Fournisseur {
 		add_action( 'save_post_fournisseur', array(__CLASS__, 'save_post_fournisseur_cb'), 10, 4 );
 		//Contact Form 7 hooks
 		add_filter( 'wp_mail', array(__CLASS__, 'redirect_wpcf7_mails'), 10,1);
+		//Maintient de la connexion de l'utilisateur pendant l'envoi du mail
 		add_filter( 'wpcf7_verify_nonce', array(__CLASS__, 'wpcf7_verify_nonce_cb' ));
 	}
 	/**
@@ -150,6 +151,7 @@ class CoopEShop_Fournisseur {
 	 * Attentu que ce soit avec un formulaire du plugin Contact Form 7
 	 */
 	public static function redirect_wpcf7_mails($args){
+		$args = self::email_specialchars($args);
 
 		if(! array_key_exists('_wpcf7_container_post', $_POST))
 			return $args;
@@ -210,9 +212,18 @@ class CoopEShop_Fournisseur {
 
 		return $args;
 	}
-	// neither, is_user_logged_in() is false
+
+	/**
+	 * Correction de caractères spéciaux
+	 */
+	public static function email_specialchars($args){
+		$args['subject'] = str_replace('&#039;', "'", $args['subject']);
+		return $args;
+	}
+
 	public static function wpcf7_verify_nonce_cb($is_active){
-		return true;
+		// keep connected at mail send time
+		return is_user_logged_in();
 	}
  	// redirect email //
 	///////////////////

@@ -15,8 +15,7 @@ function antispam_shortcode_cb( $atts, $content = null ) {
  * [mailto]ed@coopeshop.net[/mailto]
  */
 function antispam_mailto_shortcode_cb( $atts, $content = null ) {
-	$email = antispambot( sanitize_email ( $content ));
-	return sprintf('<a href="mailto:%s">%s</a>', $email, $email);
+	return make_mailto($email);
 
 }
 add_shortcode( 'antispam', 'antispam_shortcode_cb' );

@@ -81,16 +81,16 @@ class CoopEShop {
 	 * Registers stylesheets.
 	 */
 	public static function register_plugin_styles() {
-	    wp_register_style( 'coopeshop', plugins_url( 'coopeshop/public/css/coopeshop.css' ));
-	    wp_enqueue_style( 'coopeshop', '', array(), COOPESHOP_VERSION , 'all' );
+	    wp_register_style( 'coopeshop', plugins_url( 'coopeshop/public/css/coopeshop.css' ), array(), COOPESHOP_VERSION , 'all' );
+	    wp_enqueue_style( 'coopeshop');
 	}
 
 	/**
 	 * Registers js files.
 	 */
 	public static function register_plugin_js() {
-	    wp_register_script( 'coopeshop', plugins_url( 'coopeshop/public/js/coopeshop.js' ));
-	    wp_enqueue_script( 'coopeshop', '', array(), COOPESHOP_VERSION , 'all' );
+	    wp_register_script( 'coopeshop', plugins_url( 'coopeshop/public/js/coopeshop.js' ), array(), COOPESHOP_VERSION , 'all' );
+	    wp_enqueue_script( 'coopeshop' );
 	}
 
 

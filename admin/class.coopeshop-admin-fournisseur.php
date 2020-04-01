@@ -23,8 +23,55 @@ class CoopEShop_Admin_Fournisseur {
 	public static function init_hooks() {
 		add_action( 'admin_head', array(__CLASS__, 'init_PostType_Supports'), 10, 4 );
 		add_filter( 'map_meta_cap', array(__CLASS__, 'map_meta_cap'), 10, 4 );
+		
+		//add custom columns for list view
+		add_filter( 'manage_' . CoopEShop_Fournisseur::post_type . '_posts_columns', array( __CLASS__, 'manage_columns' ) );
+		add_action( 'manage_' . CoopEShop_Fournisseur::post_type . '_posts_custom_column', array( __CLASS__, 'manage_custom_columns' ), 10, 2 );
+		//set custom columns sortable
+		add_filter( 'manage_edit-' . CoopEShop_Fournisseur::post_type . '_sortable_columns', array( __CLASS__, 'manage_sortable_columns' ) );
+
 		add_action( 'save_post_fournisseur', array(__CLASS__, 'new_post_fournisseur_cb'), 10, 4 );
 	}
+
+	/**
+	 * Liste de fournisseurs
+	 */
+	public function manage_columns( $columns ) {
+		unset( $columns );
+		$columns = array(
+			'title'     => __( 'Titre', COOPESHOP_TAG ),
+			'author'        => __( 'Auteur', COOPESHOP_TAG ),
+			'details'     => __( 'Contact', COOPESHOP_TAG ),
+			'date'      => __( 'Date', COOPESHOP_TAG ),
+		);
+		return $columns;
+	}
+
+	public function manage_custom_columns( $column, $post_id ) {
+		switch ( $column ) {
+			case 'details' :
+				$nom_h = get_post_meta( $post_id, 'f-nom_humain', true );
+				$email    = get_post_meta( $post_id, 'f-email', true );
+				$email2    = get_post_meta( $post_id, 'f-email2', true );
+				$tel    = get_post_meta( $post_id, 'f-telephone', true );
+				$tel2    = get_post_meta( $post_id, 'f-telephone2', true );
+				echo trim(
+					  ($nom_h ? $nom_h . ' - ' : '')
+					. ($email ? make_clickable( $email ) : '')
+					. ($email2 ? ' - ' . make_clickable($email2) : '')
+					. ($tel ? ' - ' . $tel : '')
+					. ($tel2 ? ' - ' . $tel2 : '')
+				);
+				break;
+		}
+	}
+
+	public function manage_sortable_columns( $columns ) {
+		$columns['author']    = 'author';
+		$columns['details'] = 'details';
+		return $columns;
+	}
+	/****************/
 
 	/**
 	 * Callback lors de la création d'un nouveau fournisseur.
@@ -145,10 +192,13 @@ class CoopEShop_Admin_Fournisseur {
 	}
 
 	/**
-	 * Register Meta Box pour un nouveau fournisseur
+	 * Register Meta Box pour un nouveau fournisseur.
+	 Uniquement pour les super admins
 	 */
 	public static function register_metabox_new_post(){
-		add_meta_box('coop_fournisseur-new_post', __('Nouveau fournisseur', 'coopeshop'), array(__CLASS__, 'metabox_callback'), CoopEShop_Fournisseur::post_type, 'side', 'high');
+		if(is_super_admin()){
+			add_meta_box('coop_fournisseur-new_post', __('Nouveau fournisseur', 'coopeshop'), array(__CLASS__, 'metabox_callback'), CoopEShop_Fournisseur::post_type, 'side', 'high');
+		}
 	}
 
 	/**

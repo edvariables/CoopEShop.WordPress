@@ -206,12 +206,12 @@ class CoopEShop_Fournisseur_Shortcodes {
 				$meta_name = 'f-email';
 					$val = self::get_post_meta($post_id, $meta_name, true, true);
 					if($val)
-						$html .= make_clickable(antispambot(sanitize_email($val))) . '</br>';
+						$html .= make_mailto($val) . '</br>';
 
 				$meta_name = 'f-email2';
 					$val = self::get_post_meta($post_id, $meta_name, true, true);
 					if($val)
-						$html .= make_clickable(antispambot(sanitize_email($val))) . '</br>';
+						$html .= make_mailto($val) . '</br>';
 
 				$meta_name = 'f-siteweb';
 					$val = self::get_post_meta($post_id, $meta_name, true, true);

@@ -35,7 +35,7 @@ class CoopEShop_Admin {
 	 * Registers a stylesheet.
 	 */
 	public static function register_plugin_styles() {
-	    wp_register_style( 'coopeshop', plugins_url( 'coopeshop/admin/css/coopeshop-admin.css' ) );
-	    wp_enqueue_style( 'coopeshop', '', array(), COOPESHOP_VERSION , 'all' );
+	    wp_register_style( 'coopeshop', plugins_url( 'coopeshop/admin/css/coopeshop-admin.css' ), array(), COOPESHOP_VERSION , 'all'  );
+	    wp_enqueue_style( 'coopeshop');
 	}
 }

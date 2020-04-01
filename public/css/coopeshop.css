@@ -27,8 +27,16 @@
 	white-space: pre-line;
 	margin-bottom: 1.5em;
 }
+.entry-content .coop-fournisseur .nowrap, .entry-content .coop-fournisseur ul {
+	white-space: normal;
+}
+/* Stripe payments plugin */
+.entry-content .coop-fournisseur .asp_product_item {
+	white-space: normal;
+}
+
 .entry-content .coop-fournisseur-bon-commande {
-	white-space: nowrap;
+	white-space: normal;
 }
 
 .entry-content .coop-fournisseur-details {
