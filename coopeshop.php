@@ -27,6 +27,7 @@ define( 'COOPESHOP_PLUGIN_DIR', untrailingslashit( dirname( COOPESHOP_PLUGIN ) )
 define( 'COOPESHOP_PLUGIN_MODULES_DIR', COOPESHOP_PLUGIN_DIR . '/modules' );
 
 define( 'COOPESHOP_TAG', strtolower(COOPESHOP_PLUGIN_NAME) ); //coopeshop
+define( 'COOPESHOP_EMAIL_DOMAIN', COOPESHOP_TAG . '.net' ); //coopeshop.net
 
 require_once( COOPESHOP_PLUGIN_DIR . '/includes/functions.php' );
 require_once( COOPESHOP_PLUGIN_DIR . '/public/class.coopeshop.php' );

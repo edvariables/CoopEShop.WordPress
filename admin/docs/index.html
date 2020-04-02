@@ -1,0 +1,68 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Documentation CoopEShop à destination des administrateurs</title>
+  <meta name="description" content="Documentation CoopEShop à destination des administrateurs">
+  <meta name="author" content="ED">
+
+  <link rel="stylesheet" href="css/style.css?v=1.0">
+  <link rel="stylesheet" href="css/docs.css?v=1.0">
+
+</head>
+
+<body>
+  <script src="js/scripts.js"></script>
+<h1>Documentation à destination des administrateurs</h1>
+
+<!--------------------------------->
+<h2>Configuration de CoopEShop</h2>
+<p>Le bon de commande disponible en bas des pages de fournisseur est défini dans le paramétrage de CoopEShop.</p>
+<p>Le formulaire servant de message de la part d'un administrateur à un fournisseur est défini dans le fournisseur servant de modèle aux autres.</p>
+
+<!--------------------------------->
+<h2>Constitution des formulaires de contact via email</h2>
+<p>Actuellement, nous devons utiliser l'extension à WordPress "Contact Form 7".
+C'est le menu "Contact" qui en permet la constitution des formulaires.</p>
+<p>Le bon de commande disponible en bas des pages de fournisseur est défini dans le paramétrage de CoopEShop.</p>
+<p>Le formulaire servant de message de la part d'un administrateur à un fournisseur est défini dans le fournisseur servant de modèle aux autres.</p>
+<h3>Constitution d'un formulaire de contact</h3>
+<p>Les champs entre crochets (tels que [text le-message] ou [_site_title]) sont gérés par l'extension "Contact Form 7".</p>
+<p>L'extension "Contact Form 7" ne gère pas les "codes courts" ou shortcodes" mais interpréte les formes suivantes :</p>
+<p><ul class="label-is-code">
+<li><label>[remote_ip]</label></li>
+<li><label>[user_agent]</label></li>
+<li><label>[url]</label></li>
+<li><label>[date]</label></li>
+<li><label>[time]</label></li>
+<li><label>[invalid_fields]</label></li>
+<li><label>[post_id]</label></li>
+<li><label>[post_name]</label></li>
+<li><label>[post_title]</label></li>
+<li><label>[post_url]</label></li>
+<li><label>[post_author]</label></li>
+<li><label>[post_author_email]</label></li>
+<li><label>[site_title]</label></li>
+<li><label>[site_description]</label></li>
+<li><label>[site_url]</label></li>
+<li><label>[site_admin_email]</label></li>
+<li><label>[user_*]</label><code> -> current_user->get(*)</code></li>
+</ul></p>
+
+<p>Dans le paramétrage du ou des deux emails, les adresses emails en @coopeshop sont analysées par l'extension CoopEShop de façon spécifique lors de l'envoi du mail.</p>
+<p><ul class="label-is-code">
+<li><label>fournisseur@coopeshop.net</label>adresse e-mail du fournisseur de la page en cours. A défaut de fournisseur, il s'agit de l'auteur de la page.</li>
+<li><label>client@coopeshop.net</label>adresse e-mail saisi dans le formulaire. Il faut mettre la forme complète : <code>"[your-email]"&lt;client@coopeshop.net&gt;</code> car c'est de ce qui précède <code>&lt;...&gt;</code> qu'est déduite l'adresse à utiliser en remplacement.</li>
+<li><label>utilisateur@coopeshop.net</label>adresse e-mail du l'utilisateur actuellement connecté quelque soit son rôle, administrateur ou abonné.</li>
+<li><label>user@coopeshop.net</label><i>idem</i></li>
+<li><label>admin@coopeshop.net</label>adresse e-mail de l'administrateur du site</li>
+</ul></code></p>
+
+
+<!--------------------------------->
+
+
+</body>
+</html>

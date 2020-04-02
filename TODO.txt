@@ -4,7 +4,7 @@ Multisite
 
 https://developer.wordpress.org/plugins/security/
 
-Mieux gérer les installations et activations de plugin pour les registers des post-types et taxonomies qui sont, à l'heure actuelle, systématiques.
+revoir COOPESHOP_EMAIL_DOMAIN. coopeshop-config.php ou option('coopeshop', 'email-domain');
 
 Refaire regenerate_menu sur la base du champ menu_order
 Menu hiérarchique par type de fournisseur

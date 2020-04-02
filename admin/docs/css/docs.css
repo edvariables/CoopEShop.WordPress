@@ -1,0 +1,21 @@
+
+body {
+	margin-left: 2em;
+}
+
+h1 {
+	border-bottom: solid;
+}
+
+h2, h3, h4 {
+	text-decoration: underline;
+}
+
+ul {
+	margin-left: 1em;
+}
+ul.label-is-code label {
+	font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+	margin-bottom: 0em;
+	margin-top: 0.5em;
+}
