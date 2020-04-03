@@ -199,7 +199,7 @@ class CoopEShop_Admin_Menu {
 			<?php
 		}
 		?>
-		<div class="dashicons-before dashicons-welcome-learn-more">Peu importe le paramétrage de l'email du destinataire dans ce formulaire car c'est l'email du fournisseur qui sera utilisé</div>
+		<div class="dashicons-before dashicons-welcome-learn-more">Dans les formulaires, les adresses emails comme fournisseur@coopeshop.net ou client@coopeshop.net sont remplacées par des valeurs dépendantes du contexte.</div>
 		<?php
 	}
 

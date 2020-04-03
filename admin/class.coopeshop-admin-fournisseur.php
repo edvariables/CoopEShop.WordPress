@@ -80,6 +80,7 @@ class CoopEShop_Admin_Fournisseur {
 	public static function new_post_fournisseur_cb ($post_id, $post, $update){
 
 		if($update){
+			//Sauvegarde de brouillon
 			if(basename($_SERVER['PHP_SELF']) == 'admin-ajax.php')
 				return;
 
@@ -91,10 +92,16 @@ class CoopEShop_Admin_Fournisseur {
 		|| !is_super_admin()){ 
 			return;
 		}
-
+		
 		//Ajoute une metabox spéciale "nouveau fournisseur"
 		self::register_metabox_new_post();
 	}
+
+	public static function get_found_posts(){
+		$args = array( 'post_type' => CoopEShop_Fournisseur::post_type );
+        $the_query = new WP_Query( $args );
+        return $the_query->found_posts; 
+    }
 
 	/**
 	 * N'affiche l'éditeur que pour le fournisseur modèle ou si l'option CoopEShop::fournisseur_show_content_editor

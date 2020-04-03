@@ -19,7 +19,7 @@
 	width: 12em;
 }
 .coop-metabox-row > input[type="number"] {
-	width: 4em;	
+	width: 5em;	
 }
 .coop-metabox-row.is_not_super_admin.super_admin_only {
 	display: none;

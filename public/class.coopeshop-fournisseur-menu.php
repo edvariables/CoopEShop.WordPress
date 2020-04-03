@@ -33,69 +33,17 @@ class CoopEShop_Admin_Fournisseur_Menu {
 				|| !$show_post && !$menu_item)
 					return;
 			}
+			//Anticipe la mise à jour pour la regénération du menu
+			$position = $_POST['f-menu-position'];
+			if($position == '0')
+				$position = $_POST['f-menu-position'] = CoopEShop_Admin_Fournisseur::get_found_posts();
 			update_post_meta($post_id, 'f-menu', $_POST['f-menu'] ? 1 : 0);
-			update_post_meta($post_id, 'f-menu-position', $_POST['f-menu-position']);
+			update_post_meta($post_id, 'f-menu-position', $position);
+
 		}
 			 
 		self::regenerate_menu();
 		return;
-/*
-		$menu_integration = $post->post_status == 'publish'
-		 					&& $post->post_title
-		 					&& array_key_exists('f-menu', $_POST)
-		 					&& $_POST['f-menu'];
-		$menu_item_position = array_key_exists('f-menu-position', $_POST)
-		 						&& is_numeric( $_POST['f-menu-position'] ) ? intval( $_POST['f-menu-position'] ) : 0;
-			 
-		$menu = self::get_integration_menu();
-
-		$menu_items = wp_get_nav_menu_items($menu->term_id);
-
-		$existing_item = null;
-		$existing_item_index = null;
-		$to_remove = [];
-
-		foreach ($menu_items as $index => $item) {
-			if($item->object_id == $post_id){
-				if($menu_integration
-				&& $existing_item === null){
-					//Trouvé
-					$existing_item_index = $index;
-					$existing_item = $item;
-				}
-				else {
-					//Doublons à supprimer
-					$to_remove[] = $item;
-				}
-			}
-		}
-
-		if($menu_integration){
-			if(!$menu_item_position)
-				if($existing_item)
-					$menu_item_position = $existing_item->menu_order;
-				else
-					$menu_item_position = count($menu_items) - 1;
-
-			if($existing_item)
-				$menu_item_index = $existing_item_index;
-			else
-				$menu_item_index = 0;//count($menu_items) - 2;
-
-			$itemData =  array(
-				'menu-item-object-id' => $post->ID,
-				'menu-item-parent-id' => 0,
-				'menu-item-menu_order'  => $menu_item_position,
-				'menu-item-object' => CoopEShop_Fournisseur::post_type,
-				'menu-item-type'      => 'post_type',
-				'menu-item-status'    => 'publish'
-			);
-			wp_update_nav_menu_item($menu->term_id, $menu_item_index, $itemData);
-		}
-		foreach ($to_remove as $index => $item) {
-			wp_delete_post($item->ID);
-		}
-		*/
 	}
 
 	/**
@@ -137,46 +85,48 @@ class CoopEShop_Admin_Fournisseur_Menu {
 		$menu_items = wp_get_nav_menu_items($menu->term_id);
 
 		$menu_items_before = [];
-		$to_remove = [];
 		$menu_items_after = [];
 		
-		// Remove all menu items
-		$to_remove = [];
+		$existing_items = [];
+		$to_add = [];
 
 		foreach ($menu_items as $index => $item) {
 			if($item->object == CoopEShop_Fournisseur::post_type){
-				$to_remove[] = $item;
+				$existing_items[$item->object_id] = $item;
 			}
-			elseif(count($to_remove) === 0)
+			elseif(count($existing_items) === 0)
 				$menu_items_before[] = $item;
 			else
-				$menu_items_else[] = $item;
+				$menu_items_after[] = $item;
 		}
-		foreach ($to_remove as $index => $item) {
-			wp_delete_post($item->ID);
-		}
-
 		// Fournisseurs
 		$posts = self::get_ordered_posts();
-
 		// Add menu items
 		$menu_item_position = count($menu_items_before) + 1;
 		foreach($posts as $post_id => $post){
-			$itemData =  array(
-				'menu-item-object-id' => $post->ID,
-				'menu-item-parent-id' => 0,
-				'menu-item-menu_order'  => $menu_item_position,
-				'menu-item-object' 		=> CoopEShop_Fournisseur::post_type,
-				'menu-item-type'      => 'post_type',
-				'menu-item-status'    => 'publish'
-			);
-			wp_update_nav_menu_item($menu->term_id, 0, $itemData);
-			
-			/* ne pas faire ça, sinon ça pourrit ceux qui sont décochés temporairement
-			update_post_meta($post->ID, 'f-menu-position', $menu_item_position);
-			*/
-			++$menu_item_position;
+			if(array_key_exists($post->ID, $existing_items)){
+				$existing_items[$post->ID]->menu_order = $menu_item_position++;
+				wp_update_post( $existing_items[$post->ID] );
+				unset($existing_items[$post->ID]);
+			}
+			//Add
+			else {
 
+				$itemData =  array(
+					'menu-item-object-id' => $post->ID,
+					'menu-item-parent-id' => 0,
+					'menu-item-position'  => $menu_item_position++,
+					'menu-item-object' 		=> CoopEShop_Fournisseur::post_type,
+					'menu-item-type'      => 'post_type',
+					'menu-item-status'    => 'publish'
+				);
+				wp_update_nav_menu_item($menu->term_id, 0, $itemData);
+			}
+
+		}
+		//Suppression des résiduels
+		foreach ($existing_items as $index => $item) {
+			wp_delete_post($item->ID);
 		}
 	}
 
@@ -201,8 +151,9 @@ class CoopEShop_Admin_Fournisseur_Menu {
 			&& $post->post_title
 			&& get_post_meta($post->ID, 'f-menu', true)){
 				$posts[$post->ID] = $post;
-				if( is_numeric( get_post_meta($post->ID, 'f-menu-position', true) ))
-					$posts_order[$post->ID] = intval(get_post_meta($post->ID, 'f-menu-position', true));
+				$position = get_post_meta($post->ID, 'f-menu-position', true);
+				if( is_numeric( $position ) && $position != '0')
+					$posts_order[$post->ID] = intval($position);
 				else
 					$posts_order[$post->ID] = PHP_INT_MAX;
 			}
