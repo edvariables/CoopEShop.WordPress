@@ -75,6 +75,20 @@ class CoopEShop_Admin_Menu {
 				'class' => 'coopeshop_row',
 			]
 		);
+
+		// 
+		$field_id = 'fournisseur_type_menus';
+		add_settings_field(
+			$field_id, 
+			__( 'Mode de gestion du menu', 'coopeshop' ),
+			array(__CLASS__, 'fournisseur_type_menus_cb'),
+			COOPESHOP_TAG,
+			'coopeshop_section_fournisseurs',
+			[
+				'label_for' => $field_id,
+				'class' => 'coopeshop_row',
+			]
+		);
 	}
 
 	/**
@@ -199,7 +213,25 @@ class CoopEShop_Admin_Menu {
 			<?php
 		}
 		?>
-		<div class="dashicons-before dashicons-welcome-learn-more">Dans les formulaires, les adresses emails comme fournisseur@coopeshop.net ou client@coopeshop.net sont remplacées par des valeurs dépendantes du contexte.</div>
+		<div class="dashicons-before dashicons-welcome-learn-more">Dans les formulaires, les adresses emails comme fournisseur@<?php echo COOPESHOP_EMAIL_DOMAIN?> ou client@<?php echo COOPESHOP_EMAIL_DOMAIN?> sont remplacées par des valeurs dépendantes du contexte.</div>
+		<?php
+	}
+
+	/**
+	 * Mode de gestion des fournisseurs dans le menu 
+	 */
+	public static function fournisseur_type_menus_cb( $args ) {
+		// get the value of the setting we've registered with register_setting()
+		$option_id = $args['label_for'];
+		$option_value = CoopEShop::get_option($option_id);
+		if( ! isset( $option_value ) ) $option_value = -1;
+
+		?>	<select
+				id="<?php echo $option_id?>"
+				name="<?php echo COOPESHOP_TAG;?>[<?php echo esc_attr( $option_id ); ?>]">
+				<option value="type_fournisseur" <?php if(!$option_value || $option_value == 'type_fournisseur') echo ' selected="selected"';?>>Menu des types de fournisseurs</option>
+				<option value="fournisseurs" <?php if($option_value == 'fournisseurs') echo ' selected="selected"';?>>Menu des fournisseurs</option>
+			</select>
 		<?php
 	}
 
@@ -236,6 +268,15 @@ class CoopEShop_Admin_Menu {
 		if ( isset( $_GET['settings-updated'] ) ) {
 			// add settings saved message with the class of "updated"
 			add_settings_error( 'coopeshop_messages', 'coopeshop_message', __( 'Réglages enregistrés', 'coopeshop' ), 'updated' );
+
+			
+			if(CoopEShop::get_option('fournisseur_type_menus') == 'fournisseurs'){
+				CoopEShop_Admin_Fournisseur_Menu::regenerate_fournisseurs_menu();
+			}
+			else {
+				CoopEShop_Admin_Fournisseur_Menu::clear_fournisseurs_from_menu();
+			}
+			
 		}
 
 		// show error/update messages

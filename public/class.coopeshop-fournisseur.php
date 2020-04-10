@@ -31,6 +31,7 @@ class CoopEShop_Fournisseur {
 	 * Hook
 	 */
 	public static function init_hooks() {
+		self::init_hooks_for_search();
 		add_filter( 'the_content', array(__CLASS__, 'replace_content_from_model') );
 		add_action( 'save_post_fournisseur', array(__CLASS__, 'save_post_fournisseur_cb'), 10, 4 );
 		//Contact Form 7 hooks
@@ -44,6 +45,10 @@ class CoopEShop_Fournisseur {
 	 * voir aussi CoopEShop_Admin_Fournisseur::new_post_fournisseur_cb
 	 */
 	public static function save_post_fournisseur_cb ($post_id, $post, $is_update){
+		//Sauvegarde de brouillon ou de modification rapide
+		if(basename($_SERVER['PHP_SELF']) == 'admin-ajax.php')
+			return;
+
 		if( ! $is_update
 		|| $post->post_status == 'trashed'){
 			return;
@@ -103,7 +108,28 @@ class CoopEShop_Fournisseur {
  		|| $post->post_type != self::post_type)
  			return $content;
 	    return self::get_fournisseur_post_model_content( );
+	    //$content = ...; return self::manage_teaser_tag($post, $content);
 	}
+
+
+/*	//En mode archive, ajoute un champ (lire la suite...) après l'intro et supprime le reste
+	private function manage_teaser_tag($post, $content){
+		//Dans une liste / archive
+	    if ( !is_single()
+	      && preg_match( '/\\[fournisseur-texte-intro[^\\[]*\\]/', $content, $matches ) ) {
+	        
+			$more_link_text = __('(voir la suite...)', COOPESHOP_TAG);
+
+	        $content = explode( $matches[0], $content, 2 );
+			$content = $content[0]
+				. $matches[0]
+				. '<span id="more-' . $post_id . '"></span>'
+				. apply_filters( 'the_content_more_link', ' <a href="' . get_permalink( $post ) . "#more-{$post->ID}\" class=\"more-link\">$more_link_text</a>", $more_link_text );
+	    	return $content ;
+		}
+		else
+			return $content ;
+	}*/
  
  	/**
  	 * Retourne l'ID du post servant de modèle
@@ -154,9 +180,6 @@ class CoopEShop_Fournisseur {
 
 		static $wpcf7_mailcounter;
 
-/*print_r($wpcf7_mailcounter);
-echo "\nIN redirect_wpcf7_mails\n";*/
-
 		$args = self::email_specialchars($args);
 
 		if(! array_key_exists('_wpcf7_container_post', $_POST))
@@ -179,6 +202,7 @@ echo "\nIN redirect_wpcf7_mails\n";*/
 		// 'user' in ['fournisseur', 'client', 'admin']
 		//Dans la config du mail WPCF7, on a, par exemple, "To: [e-mail-ou-telephone]<client@coopeshop.net>"
 		//on remplace client@coopeshop.net par l'email extrait de [e-mail-ou-telephone]
+		//Ce qui veut dire que la forme complète "[e-mail-ou-telephone]<client@coopeshop.net>" doit apparaitre pour deviner l'email du client
 		foreach (array_merge($to_emails, $headers_emails) as $value) {
 			if($value['domain'] === COOPESHOP_EMAIL_DOMAIN
 			&& ! array_key_exists($value['user'], $emails)) {
@@ -191,8 +215,17 @@ echo "\nIN redirect_wpcf7_mails\n";*/
 						break;
 					case 'client':
 						$real_email = parse_emails($value['name']);
-						if(count($real_email))
+						if(count($real_email)){
 							$emails[$value['user']] = $real_email[0]['email'];
+						}
+						else {
+							//on peut être ici si, dans le formulaire, on a "client@coopeshop.net" et non "[e-mail-ou-telephone]<client@coopeshop.net>"
+							//TODO bof
+							$real_email = parse_emails($_POST['e-mail-ou-telephone']);
+							if(count($real_email)){
+								$emails[$value['user']] = $real_email[0]['email'];
+							}	
+						}
 						break;
 					case 'user':
 					case 'utilisateur':
@@ -225,7 +258,7 @@ echo "\nIN redirect_wpcf7_mails\n";*/
 			if($wpcf7_mailcounter >= 2) {
 				//Cancels email without noisy error and clear log
 				$args["to"] = '';
-				$args["subject"] = 'annulation';
+				$args["subject"] = 'client précédent sans email';
 				$args["message"] = '';
 				$args['headers'] = '';
 				return $args;	
@@ -248,18 +281,11 @@ echo "\nIN redirect_wpcf7_mails\n";*/
 				$args['message'] = str_ireplace($email_data['user'].'@'.$email_data['domain'], $emails[$email_data['user']], $args['message']);
 			}
 		}
-		
-/*print_r($emails);
-echo "\n";
-print_r($headers_emails);
-echo "\n";
-print_r($args);
-if($wpcf7_mailcounter >= 2) {
-	$args['headers'] = null;
-	die();
-}*/
-//$args["message"] = ''; //cancel
 
+		/*if($wpcf7_mailcounter >= 2) {
+			$args['headers'] .= "\r\n";
+			$args['headers'] .= "Bcc: nospam@nospam.proxad.net";
+		}*/
 		return $args;
 	}
 
@@ -306,6 +332,64 @@ if($wpcf7_mailcounter >= 2) {
 			$email = the_author_meta('email', $post->post_author);
 		}
 		return $email;
+	}
+
+
+	/**
+	 * Extend WordPress search to include custom fields
+	 *
+	 * https://adambalee.com
+	 */
+	private static function init_hooks_for_search(){
+		add_filter('posts_join', array(__CLASS__, 'cf_search_join' ));
+		add_filter( 'posts_where', array(__CLASS__, 'cf_search_where' ));
+		add_filter( 'posts_distinct', array(__CLASS__, 'cf_search_distinct' ));
+	}
+	/**
+	 * Join posts and postmeta tables
+	 *
+	 * http://codex.wordpress.org/Plugin_API/Filter_Reference/posts_join
+	 */
+	public static function cf_search_join( $join ) {
+	    global $wpdb;
+
+	    if ( is_search() ) {    
+	        $join .=' LEFT JOIN '.$wpdb->postmeta. ' ON '. $wpdb->posts . '.ID = ' . $wpdb->postmeta . '.post_id ';
+	    }
+
+	    return $join;
+	}
+
+	/**
+	 * Modify the search query with posts_where
+	 *
+	 * http://codex.wordpress.org/Plugin_API/Filter_Reference/posts_where
+	 */
+	public static function cf_search_where( $where ) {
+	    global $pagenow, $wpdb;
+
+	    if ( is_search() ) {
+	        $where = preg_replace(
+	            "/\(\s*".$wpdb->posts.".post_title\s+LIKE\s*(\'[^\']+\')\s*\)/",
+	            "(".$wpdb->posts.".post_title LIKE $1) OR (".$wpdb->postmeta.".meta_value LIKE $1)", $where );
+	    }
+
+	    return $where;
+	}
+
+	/**
+	 * Prevent duplicates
+	 *
+	 * http://codex.wordpress.org/Plugin_API/Filter_Reference/posts_distinct
+	 */
+	public static function cf_search_distinct( $where ) {
+	    global $wpdb;
+
+	    if ( is_search() ) {
+	        return "DISTINCT";
+	    }
+
+	    return $where;
 	}
 
 }

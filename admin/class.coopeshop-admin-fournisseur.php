@@ -42,6 +42,7 @@ class CoopEShop_Admin_Fournisseur {
 			'title'     => __( 'Titre', COOPESHOP_TAG ),
 			'author'        => __( 'Auteur', COOPESHOP_TAG ),
 			'details'     => __( 'Contact', COOPESHOP_TAG ),
+			'type_fournisseur'     => __( 'Type de fournisseur', COOPESHOP_TAG ),
 			'date'      => __( 'Date', COOPESHOP_TAG ),
 		);
 		return $columns;
@@ -49,6 +50,9 @@ class CoopEShop_Admin_Fournisseur {
 
 	public function manage_custom_columns( $column, $post_id ) {
 		switch ( $column ) {
+			case 'type_fournisseur' :
+				the_terms( $post_id, 'type_fournisseur', '<cite class="entry-terms">', ', ', '</cite>' );
+				break;
 			case 'details' :
 				$nom_h = get_post_meta( $post_id, 'f-nom_humain', true );
 				$email    = get_post_meta( $post_id, 'f-email', true );
@@ -78,11 +82,11 @@ class CoopEShop_Admin_Fournisseur {
 	 * voir aussi CoopEShop_Fournisseur::save_post_fournisseur_cb
 	 */
 	public static function new_post_fournisseur_cb ($post_id, $post, $update){
+		//Sauvegarde de brouillon ou de modification rapide
+		if(basename($_SERVER['PHP_SELF']) == 'admin-ajax.php')
+			return;
 
 		if($update){
-			//Sauvegarde de brouillon
-			if(basename($_SERVER['PHP_SELF']) == 'admin-ajax.php')
-				return;
 
 			CoopEShop_Admin_Fournisseur_Menu::manage_menu_integration($post_id, $post, $is_update);
 		}
@@ -92,7 +96,7 @@ class CoopEShop_Admin_Fournisseur {
 		|| !is_super_admin()){ 
 			return;
 		}
-		
+
 		//Ajoute une metabox spéciale "nouveau fournisseur"
 		self::register_metabox_new_post();
 	}
@@ -179,7 +183,7 @@ class CoopEShop_Admin_Fournisseur {
 	 */
 	public static function init_MetaBoxes() {
 		add_action( 'add_meta_boxes', array( __CLASS__, 'register_metaboxes' ), 10 ); 
-		add_action( 'save_post', array( __CLASS__, 'save_metaboxes'), 10, 2 );
+		add_action( 'save_post', array( __CLASS__, 'save_post_cb'), 10, 2 );
 	}
 
 	/**
@@ -340,22 +344,28 @@ class CoopEShop_Admin_Fournisseur {
 	}
 
 	public static function get_metabox_general_fields(){
-		$fields = array(
-			array('name' => 'f-menu',
-				'label' => __('Afficher dans le menu', 'coopeshop'),
-				'type' => 'bool'
-			),
-			array('name' => 'f-menu-position',
-				'label' => __('Position dans le menu', 'coopeshop'),
-				'type' => 'number',
-				'container_class' => 'super_admin_only'
-			),
+		$fields = array();
+		
+		if(CoopEShop::get_option('fournisseur_type_menus') == 'fournisseurs'){		
+			$fields[] =
+				array('name' => 'f-menu',
+					'label' => __('Afficher dans le menu', 'coopeshop'),
+					'type' => 'bool'
+				);	
+			$fields[] =
+				array('name' => 'f-menu-position',
+					'label' => __('Position dans le menu', 'coopeshop'),
+					'type' => 'number',
+					'container_class' => 'super_admin_only'
+				);
+		}
+		$fields[] =
 			array('name' => 'f-bon-commande',
 				'label' => __('Afficher le bon de commande', 'coopeshop'),
 				'type' => 'bool',
 				'default' => 'checked'
 			)
-		);
+		;
 		return $fields;
 	}
 
@@ -501,7 +511,24 @@ class CoopEShop_Admin_Fournisseur {
 	 * Save metaboxes' input values
 	 * Field can contain sub fields
 	 */
+	public static function save_post_cb($post_ID, $post){
+
+		//Sauvegarde de brouillon ou de modification rapide
+		if(basename($_SERVER['PHP_SELF']) == 'admin-ajax.php')
+			return;
+
+		if( $post->post_type != CoopEShop_Fournisseur::post_type )
+			return;
+
+		self::save_metaboxes($post_ID, $post);
+	}
+
+	/**
+	 * Save metaboxes' input values
+	 * Field can contain sub fields
+	 */
 	public static function save_metaboxes($post_ID, $post, $parent_field = null){
+
 		if($parent_field === null)
 			$fields = self::get_metabox_all_fields();
 		else

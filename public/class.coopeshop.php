@@ -46,6 +46,17 @@ class CoopEShop {
 		//add_action( 'get_template_part', array( 'CoopEShop', 'callback_function' ));
 		//add_filter( 'the_content', array( 'CoopEShop', 'callback_function' ));
 
+
+		//Contact Form 7 hooks
+		add_filter( 'wp_mail', array(__CLASS__, 'wp_mail_check_headers_cb'), 10,1);
+
+	}
+
+	public static function wp_mail_check_headers_cb($args) {
+		if( ! $args['headers']){
+			$args['headers'] = sprintf('From: %s', get_bloginfo('admin_email'));
+		}
+	    return $args;
 	}
 
 	public static function load_plugin_textdomain() {

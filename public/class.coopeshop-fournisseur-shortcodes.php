@@ -98,6 +98,7 @@ class CoopEShop_Fournisseur_Shortcodes {
 	}
 
 	public static function shortcodes_callback($atts, $content = '', $shortcode){
+
 		$post = get_post();
 		if(!$post){
 			echo $content;
@@ -131,6 +132,7 @@ class CoopEShop_Fournisseur_Shortcodes {
 		}
 
 		$post_id = $post->ID;
+		$html = '';
 
 		//De la forme [fournisseur info='texte-intro'] équivaut à [fournisseur-texte-intro]
 		if($shortcode == 'fournisseur'
@@ -147,13 +149,15 @@ class CoopEShop_Fournisseur_Shortcodes {
 			case 'fournisseur-texte-intro':
 			case 'fournisseur-texte-fin':
 			case 'fournisseur-catalogue':
+
 				$meta_name = 'f-' . substr($shortcode, strlen('fournisseur-')) ;
 				$val = get_post_meta($post_id, $meta_name, true);
 				if($val || $content){
-					return '<div class="coop-fournisseur coop-'. $shortcode .'">'
+					$html = '<div class="coop-fournisseur coop-'. $shortcode .'">'
 						. do_shortcode( wp_kses_post($val . $content))
 						. '</div>';
 				}
+				return $html;
 				break;
 
 			case 'fournisseur-bon-commande':
@@ -167,7 +171,7 @@ class CoopEShop_Fournisseur_Shortcodes {
 				$meta_name = 'f-email' ;
 				$email = self::get_post_meta($post_id, $meta_name, true, false);
 				if(!$email) {
-					return '<div class="dashicons-before dashicons-warning coop-error-light">Vous ne pouvez pouvez pas envoyer de bon de commande, le fournisseur n\'a pas configuré son adresse email.</div>';
+					return '<div class="dashicons-before dashicons-warning coop-error-light">Vous ne pouvez pas envoyer de bon de commande, le fournisseur n\'a pas configuré son adresse email.</div>';
 				}
 
 				$form_id = CoopEShop::get_option('fournisseur_bon_commande_post_id');
@@ -236,8 +240,17 @@ class CoopEShop_Fournisseur_Shortcodes {
 					if($val)
 						$html .= sprintf('<pre>%s</pre>', esc_html($val)) . '</br>';
 				*/
+				
 				if(! $html )
 					return '';
+				
+				// date de création
+				$html .= '<div class="entry-date">' ;
+				$html .= sprintf('<span>ici depuis le %s</span>', get_the_date()) ;
+				if(get_the_date() != get_the_modified_date())
+					$html .= sprintf('<span>, mise à jour du %s</span>', get_the_modified_date()) ;
+				$html .= '</div>' ;
+				
 				return '<div class="coop-fournisseur coop-'. $shortcode .'">'
 					. do_shortcode( wp_kses_post($html.$content))
 					. '</div>';

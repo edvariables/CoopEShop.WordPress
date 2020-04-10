@@ -51,6 +51,13 @@
 	padding: 1em;	
 }
 
+.entry-content .coop-fournisseur-details .entry-date {
+	font-size: small;
+	font-style: italic;
+	white-space: normal;
+	text-align: right;
+}
+
 /*toggle shortcode*/
 .toggle-trigger {
 	margin: 0px !important;

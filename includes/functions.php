@@ -15,8 +15,10 @@ function make_mailto($email, $title = false){
  */
 function parse_emails ($text){
 	$emails = array();
-	$result = preg_match_all('/\s*((?P<header>[\w-]+)\s*\:\s*)?((?P<name>[^<,;\n\r]+)[<])?\s*(?P<email>(?P<user>[\.\w-]+)@(?P<domain>[\.\w-]+\.[\w-]+))[>]?[\s,;]*/i', $text, $output);
+	//Attention, tolerate spaces arround @
+	$result = preg_match_all('/\s*((?P<header>[\w-]+)\s*\:\s*)?((?P<name>[^<,;\n\r]+)[<])?\s*(?P<email>(?P<user>[\.\w-]+)\s*@\s*(?P<domain>[\.\w-]+\.[\w-]+))[>]?[\s,;]*/i', $text, $output);
 	for ($i=0; $i < count($output[0]); $i++) { 
+		$output['email'][$i] = preg_replace('/\s*@\s*/', '@', $output['email'][$i]);
 		$emails[] = array(
 			'source' => $output[0][$i],
 			'header' => $output['header'][$i],

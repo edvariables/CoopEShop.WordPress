@@ -17,7 +17,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'COOPESHOP_VERSION', '1.0.4' );
+define( 'COOPESHOP_VERSION', '1.0.5' );
 define( 'COOPESHOP_MINIMUM_WP_VERSION', '4.0' );
 
 define( 'COOPESHOP_PLUGIN', __FILE__ );

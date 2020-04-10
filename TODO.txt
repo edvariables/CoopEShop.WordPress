@@ -1,23 +1,25 @@
 TODO list
+----------
+
+Génération automatique du menu hiérarchique par types de fournisseurs. 
+Arbre des types à gauche avec nombre de fournisseurs entre parenthèses
+
+Page "Tous les fournisseurs" : lien vres Inscription
++ Menu dispo dans l'interface Menus courante
 
 Multisite
 
 https://developer.wordpress.org/plugins/security/
 
-revoir COOPESHOP_EMAIL_DOMAIN. coopeshop-config.php ou option('coopeshop', 'email-domain');
-
-Refaire regenerate_menu sur la base du champ menu_order
-Menu hiérarchique par type de fournisseur
-
-Au dessus du titre d'une page de fournisseur, ajouter auteur et date, comme pour un article.
-	cf \wp-content\themes\twentyseventeen\template-parts\post:26 calls twentyseventeen_posted_on();
-
 Admin menu cf //TODO tags (list admin users ids en filtre de WP_Query)
+Admin menu, CoopEShop apprait deux fois
 
 Créer un rôle author-fournisseur
 
 A la création d'un nouveau site, création 1er fournisseur (pour modèle), on ne voit pas le Content editor qui serait pourtant utile pour les copier-coller de mise en place.
 Tester la duplication du site wp.coopeshop.net.
+
+A la création d'un nouveau fournisseur, n'envoyez qu'un seul mail pour initialisation du mot de passe et détails CoopEShop.
 
 in Contact Form 7, try [recaptcha]
 
@@ -26,3 +28,9 @@ Synchroniser les documentations depuis le site wp.coopeshop.net.
 Publish plugin sur WordPress.org/plugins
 	https://wordpress.org/plugins/developers/add/
 	account manud07
+
+User client@coopeshop.net voit beaucoup trop de choses.
+
+mailing list
+
+Doc new user

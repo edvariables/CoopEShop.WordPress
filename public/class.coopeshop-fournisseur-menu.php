@@ -19,6 +19,9 @@ class CoopEShop_Admin_Fournisseur_Menu {
 	 */
 	public static function manage_menu_integration ($post_id, $post, $is_update){
 
+		if(CoopEShop::get_option('fournisseur_type_menus') != 'fournisseurs')
+			return;
+
 		//Anticipe l'enregistrement des metas qui n'est pas forcément fait à ce niveau
 		if( array_key_exists('post_ID', $_POST)
 		&& array_key_exists('f-menu-position', $_POST) ) {
@@ -42,7 +45,7 @@ class CoopEShop_Admin_Fournisseur_Menu {
 
 		}
 			 
-		self::regenerate_menu();
+		self::regenerate_fournisseurs_menu();
 		return;
 	}
 
@@ -64,10 +67,6 @@ class CoopEShop_Admin_Fournisseur_Menu {
 
 		$menu_items = wp_get_nav_menu_items($menu->term_id);
 
-		$existing_item = null;
-		$existing_item_index = null;
-		$to_remove = [];
-
 		foreach ($menu_items as $index => $item) {
 			if($item->object_id == $post_id){
 				return $item;
@@ -80,7 +79,10 @@ class CoopEShop_Admin_Fournisseur_Menu {
 	 * Recrée le menu des fournisseurs
 	 TODO refaire sans supprimer/recréer mais en modifiant post->menu_order
 	 */
-	public static function regenerate_menu(){
+	public static function regenerate_fournisseurs_menu(){
+		if(CoopEShop::get_option('fournisseur_type_menus') != 'fournisseurs')
+			return;
+
 		$menu = self::get_integration_menu();
 		$menu_items = wp_get_nav_menu_items($menu->term_id);
 
@@ -91,7 +93,8 @@ class CoopEShop_Admin_Fournisseur_Menu {
 		$to_add = [];
 
 		foreach ($menu_items as $index => $item) {
-			if($item->object == CoopEShop_Fournisseur::post_type){
+			if($item->object == CoopEShop_Fournisseur::post_type
+			&& $item->type != 'post_type_archive'){
 				$existing_items[$item->object_id] = $item;
 			}
 			elseif(count($existing_items) === 0)
@@ -165,5 +168,21 @@ class CoopEShop_Admin_Fournisseur_Menu {
 		foreach($posts_order as $post_id => $order)
 			$ordered_posts[$post_id] = $posts[$post_id];
 		return $ordered_posts;
+	}
+
+	/**
+	 * Purge le menu de tous les fournisseurs
+	 */
+	public static function clear_fournisseurs_from_menu(){
+
+		$menu = self::get_integration_menu();
+		$menu_items = wp_get_nav_menu_items($menu->term_id);
+
+		foreach ($menu_items as $index => $item) {
+			if($item->object == CoopEShop_Fournisseur::post_type
+				&& $item->type != 'post_type_archive'){
+				wp_delete_post($item->ID);
+			}
+		}
 	}
 }
