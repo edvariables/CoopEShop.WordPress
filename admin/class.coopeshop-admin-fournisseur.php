@@ -93,7 +93,7 @@ class CoopEShop_Admin_Fournisseur {
 
 		if($update
 		|| $post->post_status == 'trashed'
-		|| !is_super_admin()){ 
+		|| !(current_user_can('manage_options'))) { 
 			return;
 		}
 
@@ -112,7 +112,7 @@ class CoopEShop_Admin_Fournisseur {
 	 */
 	public static function init_PostType_Supports(){
 		global $post;
-		if(is_super_admin()){
+		if( current_user_can('manage_options') ){
 			if($post && $post->ID == CoopEShop_Fournisseur::get_fournisseur_model_post_id()
 			|| CoopEShop::get_option('fournisseur_show_content_editor'))
 				add_post_type_support( 'fournisseur', 'editor' );
@@ -123,7 +123,7 @@ class CoopEShop_Admin_Fournisseur {
 		if($cap == 'edit_fournisseurs'){
 			//var_dump($cap, $caps);
 					$caps = array();
-					//$caps[] = is_super_admin() ? 'read' : 'do_not_allow';
+					//$caps[] = ( current_user_can('manage_options') ) ? 'read' : 'do_not_allow';
 					$caps[] = 'read';
 			return $caps;
 		}
@@ -204,10 +204,10 @@ class CoopEShop_Admin_Fournisseur {
 
 	/**
 	 * Register Meta Box pour un nouveau fournisseur.
-	 Uniquement pour les super admins
+	 Uniquement pour les admins
 	 */
 	public static function register_metabox_new_post(){
-		if(is_super_admin()){
+		if( current_user_can('manage_options') ){
 			add_meta_box('coop_fournisseur-new_post', __('Nouveau fournisseur', 'coopeshop'), array(__CLASS__, 'metabox_callback'), CoopEShop_Fournisseur::post_type, 'side', 'high');
 		}
 	}
@@ -356,7 +356,7 @@ class CoopEShop_Admin_Fournisseur {
 				array('name' => 'f-menu-position',
 					'label' => __('Position dans le menu', 'coopeshop'),
 					'type' => 'number',
-					'container_class' => 'super_admin_only'
+					'container_class' => 'admin_only'
 				);
 		}
 		$fields[] =
@@ -410,7 +410,7 @@ class CoopEShop_Admin_Fournisseur {
 			$container_class = ! array_key_exists ( 'container_class', $field ) || ! $field['container_class'] ? '' : $field['container_class'];
 			
 			$container_class .= ' coop-metabox-row';
-			$container_class .= ' is' . (is_super_admin() ? '' : '_not') . '_super_admin';
+			$container_class .= ' is' . ( current_user_can('manage_options') ? '' : '_not') . '_admin';
 			if($parent_field != null)
 				$container_class .= ' coop-metabox-subfields';
 

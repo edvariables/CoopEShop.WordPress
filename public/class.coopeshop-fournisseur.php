@@ -216,14 +216,14 @@ class CoopEShop_Fournisseur {
 					case 'client':
 						$real_email = parse_emails($value['name']);
 						if(count($real_email)){
-							$emails[$value['user']] = $real_email[0]['email'];
+							$emails['client'] = $real_email[0]['email'];
 						}
 						else {
 							//on peut être ici si, dans le formulaire, on a "client@coopeshop.net" et non "[e-mail-ou-telephone]<client@coopeshop.net>"
 							//TODO bof
 							$real_email = parse_emails($_POST['e-mail-ou-telephone']);
 							if(count($real_email)){
-								$emails[$value['user']] = $real_email[0]['email'];
+								$emails['client'] = $real_email[0]['email'];
 							}	
 						}
 						break;
@@ -253,7 +253,9 @@ class CoopEShop_Fournisseur {
 		else
 			$wpcf7_mailcounter = 1;
 
-		if( ! $emails['client'] || ! is_email($emails['client']) || ( $emails['client'] == 'client@coopeshop.net' ) ){
+		if( ! $emails['client']
+		|| ! is_email($emails['client'])
+		|| ( $emails['client'] == 'client@coopeshop.net' ) ){
 			// 2ème mail à destination du client mais email invalide
 			if($wpcf7_mailcounter >= 2) {
 				//Cancels email without noisy error and clear log
@@ -282,11 +284,46 @@ class CoopEShop_Fournisseur {
 			}
 		}
 
-		/*if($wpcf7_mailcounter >= 2) {
-			$args['headers'] .= "\r\n";
-			$args['headers'] .= "Bcc: nospam@nospam.proxad.net";
-		}*/
+		//remplace "XY<commande@coopeshop.net>" par "XY@coopeshop.net<NePasRepondre@coopeshop.net>"
+		/*$args['headers'] = str_ireplace(
+								  '"<commande@'.COOPESHOP_EMAIL_DOMAIN.'>'
+								, '.'.COOPESHOP_EMAIL_DOMAIN.'"<commande@'.COOPESHOP_EMAIL_DOMAIN.'>'
+								, $args['headers']);
+		$args['headers'] = str_ireplace(
+								  COOPESHOP_EMAIL_DOMAIN.'.'.COOPESHOP_EMAIL_DOMAIN
+								, COOPESHOP_EMAIL_DOMAIN
+								, $args['headers']);*/
+		/*print_r($args['headers']);
+		echo "\n";
+		print_r( preg_replace('/@?([\w.]*)("?\<commande@coopeshop.net\>)/', '.$1@coopeshop.net$2', $args['headers']));
+		echo "\n";
+		echo array_flip(array_filter(get_defined_constants(true)['pcre'], function($v) { return is_integer($v); }))[preg_last_error()];
+		die();*/
+		$args['headers'] = preg_replace('/@?([\w.]*)("?\<commande@coopeshop.net\>)/', '_$1@coopeshop.net$2', $args['headers']);
+
+
+		if($password_message = self::new_password_via_email($post->post_author)){
+			$args['message'] .= "\r\n<br>" . $password_message;
+		}
+
 		return $args;
+	}
+
+	/**
+	 * Dans un email au fournisseur, ajoute une invitation à saisir un nouveaui mot de passe.
+	 * Returns a string to add to email for user to reset his password.
+	 */
+	private static function new_password_via_email($user_id){
+		if(! array_key_exists( "new-password", $_POST))
+			return;
+		$user = new WP_USER($user_id);
+		$password_key = get_password_reset_key($user);
+		if( ! $password_key)
+			return;
+		$url = get_home_url( get_current_blog_id(), sprintf("wp-login.php?action=rp&key=%s&login=%s", $password_key, rawurlencode( $user->user_login )), 'login' );
+		$message .= __( 'Pour définir votre mot de passe, vous devez cliquer sur le lien suivant :' ) . "\r\n";
+		$message .= sprintf('<a href="%s">%s</a>', $url, $url) . "\r\n";
+		return $message;
 	}
 
 	/**
@@ -329,7 +366,7 @@ class CoopEShop_Fournisseur {
 			if( ! $post)
 				$post = get_post($post_id);
 			// Email de l'auteur du post
-			$email = the_author_meta('email', $post->post_author);
+			$email = get_the_author_meta('email', $post->post_author);
 		}
 		return $email;
 	}

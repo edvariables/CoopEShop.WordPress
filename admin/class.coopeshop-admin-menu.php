@@ -126,7 +126,7 @@ class CoopEShop_Admin_Menu {
 			while ( $the_query->have_posts() ) {
 				$the_query->the_post();
 				$author_level = get_the_author_meta('user_level');
-				if($author_level >= 10) { //Super_Admin authors only
+				if($author_level >= USER_LEVEL_ADMIN) { //Admin authors only
 					echo sprintf('<option value="%d" %s>%s</option>'
 						, get_the_ID()
 						, selected( $option_value, get_the_ID(), false )
@@ -196,7 +196,7 @@ class CoopEShop_Admin_Menu {
 			while ( $the_query->have_posts() ) {
 				$the_query->the_post();
 				$author_level = get_the_author_meta('user_level');
-				if($author_level >= 10) { //Super_Admin authors only
+				if($author_level >= USER_LEVEL_ADMIN) { //Admin authors only
 					echo sprintf('<option value="%d" %s>%s</option>'
 						, get_the_ID()
 						, selected( $option_value, get_the_ID(), false )

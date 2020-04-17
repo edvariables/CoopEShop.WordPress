@@ -21,7 +21,7 @@
 .coop-metabox-row > input[type="number"] {
 	width: 5em;	
 }
-.coop-metabox-row.is_not_super_admin.super_admin_only {
+.coop-metabox-row.is_not_admin.admin_only {
 	display: none;
 }
 

@@ -31,8 +31,7 @@ function parse_emails ($text){
 	//var_dump($emails);
 	return $emails;
 }
-/*
-$str_2= '"Jane Le-Doe" <john.ledoe@somewhere_interesting.com>; boby@az.e, ';
-$y = get_all_emails($str_2);
-die();
-*/
+
+function debug_callback(){
+	var_dump(func_get_args());
+}
