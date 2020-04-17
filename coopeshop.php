@@ -53,3 +53,4 @@ function coopeshop_admin_menu(){
 
 add_action( 'init', array( 'CoopEShop', 'init' ) );
 add_action( 'admin_init', array( 'CoopEShop', 'admin_init' ) );
+

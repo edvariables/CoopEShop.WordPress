@@ -50,6 +50,45 @@ class CoopEShop {
 		//Contact Form 7 hooks
 		add_filter( 'wp_mail', array(__CLASS__, 'wp_mail_check_headers_cb'), 10,1);
 
+		// Interception des emails en localhost
+		if( WP_DEBUG && in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ) ) ) {
+			add_filter( 'wp_mail', array(__CLASS__, 'wp_mail_localhost'), 100, 1);
+		}
+
+		add_action( 'validate_password_reset', array(__CLASS__, 'validate_password_reset'), 100, 2 );
+	}
+
+	public static function wp_mail_localhost($args){
+		echo "<h1>Interception des emails en localhost.</h1>";
+		print_r(sprintf("%s : %s<br>\n", 'To', $args["to"]));
+		print_r(sprintf("%s : %s<br>\n", 'Subject', $args["subject"]));
+		print_r(sprintf("%s : <code>%s</code><br>\n", 'Message', preg_replace('/html\>/', 'code>', $args["message"] )));
+		print_r(sprintf("%s : %s<br>\n", 'Headers', $args['headers']));
+		//Cancels email without noisy error and clear log
+		$args["to"] = '';
+		$args["subject"] = '(localhost)';
+		$args["message"] = '';
+		$args['headers'] = '';
+	    return $args;
+	}
+
+	public static function validate_password_reset ( $errors, $user ){
+		// En retour de validation d'un nouveau mot de passe, redirige. Utile en multisites.
+		if ( isset($_GET['action']) && $_GET['action'] == 'resetpass' 
+		&&	( ! $errors->has_errors() )
+		&& isset( $_POST['pass1'] ) && ! empty( $_POST['pass1'] ) 
+		&& isset( $_POST['redirect_to'] ) && ! empty( $_POST['redirect_to'] ) ) {
+			//code from wp-login.php
+			list( $rp_path ) = explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			$rp_cookie       = 'wp-resetpass-' . COOKIEHASH;
+			reset_password( $user, $_POST['pass1'] );
+			setcookie( $rp_cookie, ' ', time() - YEAR_IN_SECONDS, $rp_path, COOKIE_DOMAIN, is_ssl(), true );
+
+			wp_redirect( $_POST['redirect_to'] );
+			/*login_header( __( 'Password Reset' ), '<p class="message reset-pass">' . __( 'Your password has been reset.' ) . ' <a href="' . esc_url( wp_login_url() ) . '">' . __( 'Log in' ) . '</a></p>' );
+			login_footer();*/
+			exit;
+		}
 	}
 
 	public static function wp_mail_check_headers_cb($args) {

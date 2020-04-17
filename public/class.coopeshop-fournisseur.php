@@ -38,6 +38,8 @@ class CoopEShop_Fournisseur {
 		add_filter( 'wp_mail', array(__CLASS__, 'redirect_wpcf7_mails'), 10,1);
 		//Maintient de la connexion de l'utilisateur pendant l'envoi du mail
 		add_filter( 'wpcf7_verify_nonce', array(__CLASS__, 'wpcf7_verify_nonce_cb' ));
+		//Fenêtre de réinitialisation de mot de passe
+		add_action( 'resetpass_form', array(__CLASS__, 'resetpass_form' ));
 	}
 	/**
 	 * Callback lors de l'enregistrement d'un fournisseur.
@@ -320,11 +322,30 @@ class CoopEShop_Fournisseur {
 		$password_key = get_password_reset_key($user);
 		if( ! $password_key)
 			return;
-		$url = get_home_url( get_current_blog_id(), sprintf("wp-login.php?action=rp&key=%s&login=%s", $password_key, rawurlencode( $user->user_login )), 'login' );
-		$message .= __( 'Pour définir votre mot de passe, vous devez cliquer sur le lien suivant :' ) . "\r\n";
-		$message .= sprintf('<a href="%s">%s</a>', $url, $url) . "\r\n";
+		$redirect_to = get_home_url( get_current_blog_id(), sprintf("wp-login.php?login=%s", rawurlencode( $user->user_login )), 'login' );
+		$url = sprintf("wp-login.php?action=rp&key=%s&login=%s&redirect_to=%s", $password_key, rawurlencode( $user->user_login ), esc_url($redirect_to));
+		$url = network_site_url( $url );
+		$message .= sprintf(__( 'Pour définir votre mot de passe, <a href="%s">vous devez cliquer ici</a>.', COOPESHOP_TAG) , $url ) . "\r\n";
 		return $message;
 	}
+	/**
+	 * Fenêtre de réinitialisation de mot de passe
+	 */
+	public static function resetpass_form( $user ){
+		//insert html code
+		// redirect_to
+		if ( isset( $_GET['redirect_to'] ) ) {
+			$url = $_GET['redirect_to'];
+		}
+		elseif ( isset( $_POST['redirect_to'] ) ) {
+			$url = $_POST['redirect_to'];
+		}
+		else {
+			$url = get_home_url( get_current_blog_id(), sprintf("wp-admin/"), 'admin' );
+		}
+		echo sprintf('<input type="hidden" name="%s" value="%s"/>', 'redirect_to', $url );
+	}
+
 
 	/**
 	 * Correction de caractères spéciaux
