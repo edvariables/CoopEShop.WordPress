@@ -109,60 +109,35 @@ class CoopEShop_Fournisseur {
  		if( ! $post
  		|| $post->post_type != self::post_type)
  			return $content;
-	    return self::get_fournisseur_post_model_content( );
-	    //$content = ...; return self::manage_teaser_tag($post, $content);
+	    return self::get_fournisseur_content( );
 	}
-
-
-/*	//En mode archive, ajoute un champ (lire la suite...) après l'intro et supprime le reste
-	private function manage_teaser_tag($post, $content){
-		//Dans une liste / archive
-	    if ( !is_single()
-	      && preg_match( '/\\[fournisseur-texte-intro[^\\[]*\\]/', $content, $matches ) ) {
-	        
-			$more_link_text = __('(voir la suite...)', COOPESHOP_TAG);
-
-	        $content = explode( $matches[0], $content, 2 );
-			$content = $content[0]
-				. $matches[0]
-				. '<span id="more-' . $post_id . '"></span>'
-				. apply_filters( 'the_content_more_link', ' <a href="' . get_permalink( $post ) . "#more-{$post->ID}\" class=\"more-link\">$more_link_text</a>", $more_link_text );
-	    	return $content ;
-		}
-		else
-			return $content ;
-	}*/
  
  	/**
- 	 * Retourne l'ID du post servant de modèle
+ 	 * Retourne l'ID du post servant de bon de commande
  	 */
-	public static function get_fournisseur_model_post_id( ) {
-		$option_id = 'fournisseur_model_post_id';
+	public static function get_fournisseur_bon_commande_post_id( ) {
+		$option_id = 'fournisseur_bon_commande_post_id';
 		return CoopEShop::get_option($option_id);
-	}
- 
- 	/**
- 	 * Retourne le post servant de modèle
- 	 */
-	public static function get_fournisseur_post_model( ) {
-		return get_post(self::get_fournisseur_model_post_id());
 	}
  
  	/**
  	 * Retourne le Content du post servant de modèle
  	 */
-	public static function get_fournisseur_post_model_content( ) {
-		$post_id = self::get_fournisseur_model_post_id();
-		if($post_id){
-			$html = get_the_content(null, false, $post_id);
-		}
-		else {
-			$html = '<p class="">Le modèle de fournisseur n\'est pas défini dans le paramétrage de CoopEShop.</p>';
-		}
-		if( ! isset($html) || ! $html){
-			$html = '<p class="">Le modèle de fournisseur est vide dans sa zone de saisie principale. 
-			Peut être qu\'elle n\'est pas visible alors allez voir du côté du paramétrage de CoopEShop.
-			</p>';
+	public static function get_fournisseur_content( ) {
+		$html = '[fournisseur-texte-intro]
+[fournisseur-catalogue]
+[fournisseur-texte-fin]
+[fournisseur-details notoggle="Contactez-nous"]
+[fournisseur-bon-commande notoggle="Envoyez-nous une commande !"]';
+		
+		if( current_user_can('manage_options') ){
+			$post_id = CoopEShop::get_option('admin_message_contact_form_id');
+			if(! $post_id){
+				return '<p class="">Le bon de commande de fournisseur n\'est pas défini dans le paramétrage de CoopEShop.</p>';
+			}
+
+			$html .= sprintf('[toggle title="Message de l\'administrateur au fournisseur"] [contact-form-7 id="%s"][/toggle]'
+				, $post_id);
 		}
 		return $html;
 	}

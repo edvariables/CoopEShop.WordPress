@@ -31,12 +31,14 @@ class CoopEShop_Admin_Fournisseur {
 		add_filter( 'manage_edit-' . CoopEShop_Fournisseur::post_type . '_sortable_columns', array( __CLASS__, 'manage_sortable_columns' ) );
 
 		add_action( 'save_post_fournisseur', array(__CLASS__, 'new_post_fournisseur_cb'), 10, 4 );
+
+		add_action('wp_dashboard_setup', array(__CLASS__, 'add_dashboard_widgets') );
 	}
 
 	/**
 	 * Liste de fournisseurs
 	 */
-	public function manage_columns( $columns ) {
+	public static function manage_columns( $columns ) {
 		unset( $columns );
 		$columns = array(
 			'title'     => __( 'Titre', COOPESHOP_TAG ),
@@ -48,7 +50,7 @@ class CoopEShop_Admin_Fournisseur {
 		return $columns;
 	}
 
-	public function manage_custom_columns( $column, $post_id ) {
+	public static function manage_custom_columns( $column, $post_id ) {
 		switch ( $column ) {
 			case 'type_fournisseur' :
 				the_terms( $post_id, 'type_fournisseur', '<cite class="entry-terms">', ', ', '</cite>' );
@@ -70,7 +72,7 @@ class CoopEShop_Admin_Fournisseur {
 		}
 	}
 
-	public function manage_sortable_columns( $columns ) {
+	public static function manage_sortable_columns( $columns ) {
 		$columns['author']    = 'author';
 		$columns['details'] = 'details';
 		return $columns;
@@ -88,7 +90,7 @@ class CoopEShop_Admin_Fournisseur {
 
 		if($update){
 
-			CoopEShop_Admin_Fournisseur_Menu::manage_menu_integration($post_id, $post, $is_update);
+			CoopEShop_Admin_Fournisseur_Menu::manage_menu_integration($post_id, $post, $update);
 		}
 
 		if($update
@@ -101,10 +103,16 @@ class CoopEShop_Admin_Fournisseur {
 		self::register_metabox_new_post();
 	}
 
-	public static function get_found_posts(){
-		$args = array( 'post_type' => CoopEShop_Fournisseur::post_type );
+	public static function get_found_posts($args = null){
+		return count(self::get_posts($args)); 
+    }
+
+	public static function get_posts($args = null){
+		if(!is_array($args))
+			$args = array();
+		$args[ 'post_type'] = CoopEShop_Fournisseur::post_type;
         $the_query = new WP_Query( $args );
-        return $the_query->found_posts; 
+        return $the_query->posts; 
     }
 
 	/**
@@ -113,13 +121,23 @@ class CoopEShop_Admin_Fournisseur {
 	public static function init_PostType_Supports(){
 		global $post;
 		if( current_user_can('manage_options') ){
-			if($post && $post->ID == CoopEShop_Fournisseur::get_fournisseur_model_post_id()
+			/*if($post && $post->ID == CoopEShop_Fournisseur::get_fournisseur_model_post_id()
 			|| CoopEShop::get_option('fournisseur_show_content_editor'))
-				add_post_type_support( 'fournisseur', 'editor' );
+				add_post_type_support( 'fournisseur', 'editor' );*/
 		}
 	}
 
+	/**
+	 * map_meta_cap
+	 */
 	public static function map_meta_cap( $caps, $cap, $user_id, $args ) {
+
+		if( 0 ) {
+			echo "<br>\n-------------------------------------------------------------------------------";
+			print_r(func_get_args());
+			/*echo "<br>\n-----------------------------------------------------------------------------";
+			print_r($caps);*/
+		}
 		if($cap == 'edit_fournisseurs'){
 			//var_dump($cap, $caps);
 					$caps = array();
@@ -498,7 +516,7 @@ class CoopEShop_Admin_Fournisseur {
 			}
 
 			//sub fields
-			if(is_array($field['fields'])){
+			if( array_key_exists('fields', $field) && is_array($field['fields'])){
 				self::metabox_html($field['fields'], $post, $metabox, $field);
 			}
 		
@@ -538,29 +556,108 @@ class CoopEShop_Admin_Fournisseur {
 			if($parent_field !== null)
 				$name = sprintf($name, $parent_field['name']);
 			// remember : a checkbox unchecked does not return any value
-			if(! isset($_POST[$name])){
+			if( isset($_POST[$name])){
+				$val = $_POST[$name];
+			}
+			else {
 				if(self::$the_post_is_new
-				&& $field['default'])
+				&& isset($field['default']) && $field['default'])
 					$val = $field['default'];
-				elseif($field['input'] === 'checkbox'
-				|| $field['type'] === 'checkbox'
-				|| $field['input'] === 'bool'
-				|| $field['type'] === 'bool'){
+				elseif( (isset($field['input']) && ($field['input'] === 'checkbox' || $field['input'] === 'bool'))
+					 || (isset($field['type'])  && ($field['type']  === 'checkbox' || $field['type']  === 'bool')) ) {
 					$val = '0';
 				}
+				else
+					$val = null;
 			}
-			elseif(isset($_POST[$name]))
-				$val = $_POST[$name];
-			else
-				continue;
 			update_post_meta($post_ID, $name, $val);
 
 			//sub fields
-			if(is_array($field['fields'])){
+			if(isset($field['fields']) && is_array($field['fields'])){
 				self::save_metaboxes($post_ID, $post, $field);
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * dashboard_widgets
+	 */
+
+	/**
+	 * Init
+	 */
+	public static function add_dashboard_widgets() {
+	    global $wp_meta_boxes;
+	    $fournisseurs = self::get_posts(array( 'author' => get_current_user_id() ));
+		if( count($fournisseurs) ) {
+			add_meta_box( 'dashboard_my_fournisseurs',
+				__('Je suis fournisseur', COOPESHOP_TAG),
+				array(__CLASS__, 'dashboard_my_fournisseurs_cb'),
+				'dashboard',
+				'normal',
+				'high',
+				array('fournisseurs' => $fournisseurs) );
+		}
+
+		if(current_user_can('manage_options')){
+		    $fournisseurs = self::get_posts();
+			if( count($fournisseurs) ) {
+				add_meta_box( 'dashboard_all_fournisseurs',
+					__('Les fournisseurs', COOPESHOP_TAG),
+					array(__CLASS__, 'dashboard_all_fournisseurs_cb'),
+					'dashboard',
+					'side',
+					'high',
+					array('fournisseurs' => $fournisseurs) );
+			}
+		}
+	}
+
+	/**
+	 * Callback
+	 */
+	public static function dashboard_my_fournisseurs_cb($post , $widget) {
+		$fournisseurs = $widget['args']['fournisseurs'];
+		?><ul><?php
+		foreach($fournisseurs as $fournisseur){
+			//;
+			echo '<li>';
+			?><header class="entry-header"><?php 
+				edit_post_link( $fournisseur->post_title, '<h2 class="entry-title">', '</h2>', $fournisseur );
+				the_terms( $fournisseur->ID, 'type_fournisseur', 
+					sprintf( '<cite class="entry-terms">' ), ', ', '</cite>' );
+			?></header><?php
+			?><div class="entry-summary">
+				<?php echo get_the_excerpt($fournisseur); ?>
+			</div><?php
+			echo '</li>';
+			
+		}
+		?></ul><?php
+	}
+
+	/**
+	 * Callback
+	 */
+	public static function dashboard_all_fournisseurs_cb($post , $widget) {
+		$fournisseurs = $widget['args']['fournisseurs'];
+		?><ul><?php
+		foreach($fournisseurs as $fournisseur){
+			//;
+			echo '<li>';
+			?><header class="entry-header"><?php 
+				edit_post_link( $fournisseur->post_title, '<h2 class="entry-title">', '</h2>', $fournisseur );
+				the_terms( $fournisseur->ID, 'type_fournisseur', 
+					sprintf( '<cite class="entry-terms">' ), ', ', '</cite>' );
+			?></header><?php
+			?><div class="entry-summary">
+				<?php echo get_the_excerpt($fournisseur); ?>
+			</div><?php
+			echo '</li>';
+			
+		}
+		?></ul><?php
 	}
 
 }

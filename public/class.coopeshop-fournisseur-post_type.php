@@ -3,9 +3,11 @@
 /**
  * CoopEShop -> Fournisseur
  * Custom post type for WordPress.
+ * Custom user role for WordPress.
  * 
- * Définition du Post Type fournisseur
- * Définition de la taxonomie type_fournisseur
+ * Définition du Post Type 'fournisseur'
+ * Définition de la taxonomie 'type_fournisseur'
+ * Définition du rôle utilisateur 'fournisseur'
  * A l'affichage d'un fournisseur, le Content est remplacé par celui du fournisseur Modèle
  * En Admin, le bloc d'édition du Content est masqué d'après la définition du Post type : le paramètre 'supports' qui ne contient pas 'editor', see CoopEShop_Admin_Fournisseur::init_PostType_Supports
  *
@@ -38,17 +40,7 @@ class CoopEShop_Fournisseur_Post_type {
 			'items_list_navigation' => __( 'Navigation dans la liste de fournisseurs', 'coopeshop' ),
 			'filter_items_list'     => __( 'Filtrer la liste de fournisseurs', 'coopeshop' ),
 		);
-		$capabilities = array(
-			'edit_post'             => 'edit_fournisseur',
-			'read_post'             => 'read_fournisseur',
-			'delete_post'           => 'delete_fournisseur',
-			'delete_posts'          => 'delete_fournisseur',
-			'delete_others_posts'   => 'edit_others_fournisseurs',
-			'edit_posts'            => 'edit_fournisseurs',
-			'edit_others_posts'     => 'edit_others_fournisseurs',
-			'publish_posts'         => 'publish_fournisseurs',
-			'read_private_posts'    => 'read_private_fournisseurs',
-		);
+		$capabilities = self::post_type_capabilities();
 		$args = array(
 			'label'                 => __( 'Fournisseur', 'coopeshop' ),
 			'description'           => __( 'Fournisseur information pages.', 'coopeshop' ),
@@ -113,5 +105,38 @@ class CoopEShop_Fournisseur_Post_type {
 		register_taxonomy( CoopEShop_Fournisseur::taxonomy_type_fournisseur, array( CoopEShop_Fournisseur::post_type ), $args );
 
 	}
+	private static function post_type_capabilities(){
+		return array(
+			'create_fournisseurs' => 'create_posts',
+			'edit_fournisseurs' => 'edit_posts',
+			'edit_others_fournisseurs' => 'edit_others_posts',
+			'publish_fournisseurs' => 'publish_posts',
+		);
+	}
+
+	/**
+	 *
+	 */
+	public static function register_user_role(){
+		return;
+		
+		$capabilities = array(
+			'read' => true,
+			'edit_posts' => true,
+			'edit_fournisseurs' => true,
+			'wpcf7_read_contact_forms' => false,
+
+			'publish_fournisseurs' => true,
+			'delete_posts' => true,
+			'delete_published_posts' => true,
+			'edit_published_posts' => true,
+			'publish_posts' => true,
+			'upload_files ' => true,
+			'create_posts' => false,
+			'create_fournisseurs' => false,
+		);
+		add_role( 'fournisseur', __('Fournisseur', COOPESHOP_TAG ),  $capabilities);
+	}
+
 
 }

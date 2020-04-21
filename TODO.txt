@@ -1,23 +1,20 @@
 TODO list
 ----------
 
+Tableau de bord, dashboard : accès direct à la page du fournisseur
+
 Génération automatique du menu hiérarchique par types de fournisseurs. 
 Arbre des types à gauche avec nombre de fournisseurs entre parenthèses
 
-Page "Tous les fournisseurs" : lien vers Inscription
-+ Menu dispo dans l'interface Menus courante
+Page "Tous les fournisseurs" : + Menu dispo dans l'interface Menus courante
 
 https://developer.wordpress.org/plugins/security/
 
-Admin menu cf //TODO tags (list admin users ids en filtre de WP_Query)
-Admin menu, CoopEShop apprait deux fois
-
 Créer un rôle author-fournisseur
 
-A la création d'un nouveau fournisseur, n'envoyez qu'un seul mail pour initialisation du mot de passe et détails CoopEShop.
-cf get_password_reset_key()
-
 Synchroniser les documentations depuis le site wp.coopeshop.net.
+
+Synchroniser les pages fournisseurs
 
 Publish plugin sur WordPress.org/plugins
 	https://wordpress.org/plugins/developers/add/
@@ -34,35 +31,15 @@ API open street map
 Mutualiser etapecavalieredubalayn.fr
 
 *********
-Migration
----------
-Fichiers
-	wp-content/uploads/ vers wp-content/uploads/sites/6/
-
-Users
-	User + meta
-	User = User + 100 sauf 1
-	UserMeta_id = UserMeta_id + 1000 sauf user_id 1
-	post_author = post_author + 100 sauf 1
-	comments et commentsmeta : replace admin1974?
-	import
-		affecter users au site 6
-Export
-	options :
-		INSERT IGNORE
-		sans la table wpml_mails
-Import
-	Replace tablename mod191 par wor6359_6
-	Import
-	UPDATE `wor6359_6_posts` SET `post_author`=1
+Clean DB
 
 
 
-DELETE FROM `wor6359_n_postmeta` WHERE meta_key LIKE 'f-%' AND post_id NOT IN (SELECT `ID` FROM `wor6359_n_posts` WHERE `post_type` = 'fournisseur' AND post_title != 'Brouillon auto') 
+DELETE FROM `wor6359_6_postmeta` WHERE meta_key LIKE 'f-%' AND post_id NOT IN (SELECT `ID` FROM `wor6359_6_posts` WHERE `post_type` = 'fournisseur' AND post_title != 'Brouillon auto') 
 
-SELECT * FROM `wor6359_5_postmeta` 
-WHERE meta_id IN (SELECT MIN(meta_id) FROM `wor6359_5_postmeta` m 
-                  INNER JOIN `wor6359_5_posts` p 
+SELECT * FROM `wor6359_6_postmeta` 
+WHERE meta_id IN (SELECT MIN(meta_id) FROM `wor6359_6_postmeta` m 
+                  INNER JOIN `wor6359_6_posts` p 
                   ON m.post_id = p.ID
                   WHERE `post_type` = 'fournisseur'
                   GROUP BY m.`post_id`, m.`meta_key`

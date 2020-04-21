@@ -14,8 +14,10 @@ class CoopEShop {
 	}
 
 	public static function admin_init() {
-		require_once( COOPESHOP_PLUGIN_DIR . '/admin/class.coopeshop-admin.php' );
-		CoopEShop_Admin::init();
+		if(! class_exists('CoopEShop_Admin')){
+			require_once( COOPESHOP_PLUGIN_DIR . '/admin/class.coopeshop-admin.php' );
+			CoopEShop_Admin::init();
+		}
 	}
 
 	public static function init_includes() {
@@ -210,6 +212,7 @@ class CoopEShop {
 		} elseif ( ! empty( $_SERVER['SCRIPT_NAME'] ) && false !== strpos( $_SERVER['SCRIPT_NAME'], '/wp-admin/plugins.php' ) ) {
 			add_option( 'Activated_CoopEShop', true );
 		}
+		self::register_user_roles();
 		self::register_post_types();
 	}
 
@@ -262,14 +265,53 @@ class CoopEShop {
 			}
 		}
 		self::unregister_post_types();
+		self::unregister_user_roles();
+	}
+
+	/**
+	 * register_post_types
+	 */
+	private static function include_and_init($class_name){
+		if(! class_exists($class_name)){
+			switch($class_name){
+				case 'CoopEShop_Post_Types':
+		 			$file = COOPESHOP_PLUGIN_DIR . '/public/class.coopeshop-post_types.php';
+					break;
+
+				case 'CoopEShop_Fournisseur_Post_type':
+		 			$file = COOPESHOP_PLUGIN_DIR . '/public/class.coopeshop-fournisseur-post_type.php';
+					break;
+				
+				default:
+					var_dump($class_name);//show calls stack
+					die(sprintf('Classe inconnue : "%s"', $class_name));
+			}
+			require_once( $file );
+			if(method_exists($class_name, 'init'))
+				$class_name::init();
+		}
+	}
+
+	/**
+	 * Register user roles
+	 */
+	private static function register_user_roles(){
+		self::include_and_init('CoopEShop_Fournisseur_Post_type');
+		CoopEShop_Fournisseur_Post_type::register_user_role();
+	}
+
+	/**
+	 * Unregister user roles
+	 */
+	private static function unregister_user_roles(){
+		remove_role( 'fournisseur');
 	}
 
 	/**
 	 * register_post_types
 	 */
 	private static function register_post_types(){
-		require_once( COOPESHOP_PLUGIN_DIR . '/public/class.coopeshop-post_types.php' );
-		CoopEShop_Post_Types::init();
+		self::include_and_init('CoopEShop_Post_Types');
 		CoopEShop_Post_Types::register_post_types();
 	}
 
@@ -277,8 +319,7 @@ class CoopEShop {
 	 * unregister_post_types
 	 */
 	private static function unregister_post_types(){
-		require_once( COOPESHOP_PLUGIN_DIR . '/public/class.coopeshop-post_types.php' );
-		CoopEShop_Post_Types::init();
+		self::include_and_init('CoopEShop_Post_Types');
 		CoopEShop_Post_Types::unregister_post_types();
 	}
 }

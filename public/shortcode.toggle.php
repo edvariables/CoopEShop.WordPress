@@ -10,8 +10,8 @@ function toggle_shortcode_cb( $atts, $content = null ) {
 
 	if(array_key_exists('admin_only', $atts)
 	&& $atts['admin_only']){
-		global $user_level;
-		/*var_dump( is_admin());
+		/*global $user_level;
+		var_dump( is_admin());
 		var_dump( is_super_admin() );
 		var_dump( $user_level);*/
 		if( ! current_user_can('manage_options') )
