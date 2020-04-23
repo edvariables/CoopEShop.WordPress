@@ -45,7 +45,7 @@ class CoopEShop_Fournisseur_Post_type {
 			'label'                 => __( 'Fournisseur', 'coopeshop' ),
 			'description'           => __( 'Fournisseur information pages.', 'coopeshop' ),
 			'labels'                => $labels,
-			'supports'              => array( 'title', 'author', 'thumbnail', 'revisions' ),//, 'editor' see CoopEShop_Admin_Fournisseur::init_PostType_Supports
+			'supports'              => array( 'title', 'thumbnail', 'revisions' ),//, 'author', 'editor' see CoopEShop_Admin_Fournisseur::init_PostType_Supports
 			'taxonomies'            => array( 'type_fournisseur' ),
 			'hierarchical'          => false,
 			'public'                => true,

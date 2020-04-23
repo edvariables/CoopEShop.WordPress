@@ -32,70 +32,15 @@ class CoopEShop_Fournisseur {
 	 */
 	public static function init_hooks() {
 		self::init_hooks_for_search();
-		add_filter( 'the_content', array(__CLASS__, 'replace_content_from_model') );
-		add_action( 'save_post_fournisseur', array(__CLASS__, 'save_post_fournisseur_cb'), 10, 4 );
-		//Contact Form 7 hooks
-		add_filter( 'wp_mail', array(__CLASS__, 'redirect_wpcf7_mails'), 10,1);
+		add_filter( 'the_content', array(__CLASS__, 'the_fournisseur_content') );
+		
+		//wp_mail from Contact Form 7
+		add_filter( 'wp_mail', array(__CLASS__, 'wp_mail_coopeshop_fields'), 10,1);
 		//Maintient de la connexion de l'utilisateur pendant l'envoi du mail
 		add_filter( 'wpcf7_verify_nonce', array(__CLASS__, 'wpcf7_verify_nonce_cb' ));
+
 		//Fenêtre de réinitialisation de mot de passe
 		add_action( 'resetpass_form', array(__CLASS__, 'resetpass_form' ));
-	}
-	/**
-	 * Callback lors de l'enregistrement d'un fournisseur.
-	 * A ce stade, les metaboxes ne sont pas encore sauvegardées
-	 * voir aussi CoopEShop_Admin_Fournisseur::new_post_fournisseur_cb
-	 */
-	public static function save_post_fournisseur_cb ($post_id, $post, $is_update){
-		//Sauvegarde de brouillon ou de modification rapide
-		if(basename($_SERVER['PHP_SELF']) == 'admin-ajax.php')
-			return;
-
-		if( ! $is_update
-		|| $post->post_status == 'trashed'){
-			return;
-		}
-		$create_user = array_key_exists('f-create-user', $_POST) ? $_POST['f-create-user'] : false;
-		if( $create_user){
-			self::create_user_on_save($post_id, $post, $is_update);
-		}
-	}
-
-	/**
-	 * Lors du premier enregistrement, on crée l'utilisateur
-	 * A ce stade, les metaboxes ne sont pas encore sauvegardées
-	 */
-	public static function create_user_on_save ($post_id, $post, $is_update){
-		$email = array_key_exists('f-email', $_POST) ? $_POST['f-email'] : false;
-		if(!$email || !is_email($email)) {
-			show_message("Il manque l'adresse mail ou elle est incorrecte.");
-			die("perdu..."); //TODO peut mieux faire...
-		}
-		$user_name = array_key_exists('f-nom_humain', $_POST) ? $_POST['f-nom_humain'] : false;
-		$user_login = array_key_exists('f-create-user-slug', $_POST) ? $_POST['f-create-user-slug'] : false;
-	
-		$data = array(
-			'description' => 'Fournisseur ' . $post->post_name
-		);
-		$user = CoopEShop_User::create_user_for_fournisseur($email, $user_name, $user_login, $data);
-		if( is_wp_error($user)) {
-			show_message($user);
-			die("perdu..."); //TODO peut mieux faire...
-		}
-		if($user){
-			unset($_POST['f-create-user']);
-
-			$post->post_author = $user->ID;
-
-			wp_update_post(array(
-				'ID' => $post_id,
-				'post_author' => $user->ID
-			), true);
-		}
-		/*var_dump('user', $user);
-		var_dump(func_get_args());
-		var_dump(get_post_meta($post_id, 'f-email', true));
-		die('save_post_fournisseur_cb');*/
 	}
  
  	/////////////
@@ -104,7 +49,7 @@ class CoopEShop_Fournisseur {
 	/**
 	 * Hook
 	 */
- 	public static function replace_content_from_model( $content ) {
+ 	public static function the_fournisseur_content( $content ) {
  		global $post;
  		if( ! $post
  		|| $post->post_type != self::post_type)
@@ -153,7 +98,7 @@ class CoopEShop_Fournisseur {
 	 * Attendu que ce soit avec un formulaire du plugin Contact Form 7.
 	 * Le email2, email de copie, ne subit pas la redirection.
 	 */
-	public static function redirect_wpcf7_mails($args){
+	public static function wp_mail_coopeshop_fields($args){
 
 		static $wpcf7_mailcounter;
 
@@ -163,7 +108,7 @@ class CoopEShop_Fournisseur {
 			return $args;
 
 		$post_id = $_POST['_wpcf7_container_post'];
-		if( !$post_id )
+		if( ! $post_id )
 			return $args;
 
 		// Only from fournisseur pages
@@ -291,7 +236,10 @@ class CoopEShop_Fournisseur {
 	 * Returns a string to add to email for user to reset his password.
 	 */
 	private static function new_password_via_email($user_id){
-		if(! array_key_exists( "new-password", $_POST))
+		if(! array_key_exists( "new-password", $_POST)
+		|| is_super_admin($user_id)
+		|| $user_id == CoopEShop_User::get_blog_admin_id()
+		)
 			return;
 		$user = new WP_USER($user_id);
 		$password_key = get_password_reset_key($user);
@@ -309,14 +257,11 @@ class CoopEShop_Fournisseur {
 	public static function resetpass_form( $user ){
 		//insert html code
 		// redirect_to
-		if ( isset( $_GET['redirect_to'] ) ) {
-			$url = $_GET['redirect_to'];
+		if ( isset( $_REQUEST['redirect_to'] ) ) {
+			$url = $_REQUEST['redirect_to'];
 		}
-		elseif ( isset( $_POST['redirect_to'] ) ) {
-			$url = $_POST['redirect_to'];
-		}
-		else {
-			$url = get_home_url( get_current_blog_id(), sprintf("wp-admin/"), 'admin' );
+		if( ! $url) {
+			$url = get_home_url( CoopEShop_User::get_current_or_default_blog_id($user), sprintf("wp-admin/"), 'admin' );
 		}
 		echo sprintf('<input type="hidden" name="%s" value="%s"/>', 'redirect_to', $url );
 	}
@@ -367,7 +312,63 @@ class CoopEShop_Fournisseur {
 		return $email;
 	}
 
+	/***********************************************************/
 
+	/**
+	 * Initialize a new fournisseur
+	 * Called from email interception
+	 */
+	public static function new_fournisseur($data){
+		if(is_object($data) && is_a($data, 'WPCF7_ContactForm', true)){ //contact form 7 -> wp_mail -> $args['message']
+			$contact_form = $data;
+			$data = array(
+				'title' => $_POST['f-title'],
+				'f-nom_humain' => $_POST['f-nom_humain'],
+				'f-email' => $_POST['f-email'],
+				'f-email2' => $_POST['f-email2'],
+				'f-telephone' => $_POST['f-telephone'],
+				'f-telephone2' => $_POST['f-telephone2'],
+				'f-siteweb' => $_POST['f-siteweb'],
+				'f-facebook' => $_POST['f-facebook'],
+				'f-adresse' => $_POST['f-adresse'],
+				'f-texte-intro' => $_POST['f-texte-intro'],
+				'f-catalogue' => $_POST['f-catalogue'],
+				'f-texte-fin' => sprintf("<p>%s</p><p>%s</p>",
+								$_POST['texte-retrait'],
+								$_POST['texte-conclusion']),
+			);
+		}
+		elseif( ! is_array($data)
+			 || ! isset($data['title']) ){
+			return;
+		}
+
+
+		$data['f-nom_humain-show'] = 1;
+		$data['f-email-show'] = 1;
+		$data['f-email2-show'] = 1;
+		$data['f-telephone-show'] = 1;
+		$data['f-telephone2-show'] = 1;
+		$data['f-siteweb-show'] = 1;
+		$data['f-facebook-show'] = 1;
+		$data['f-adresse-show'] = 1;
+
+		$post_author = CoopEShop_User::get_blog_admin_id();
+		$post_title = $data['title'];
+		unset($data['title']);
+		
+		$postarr = array(
+			'post_status' => 'pending',
+			'post_title' => $post_title,
+			'post_type' => CoopEShop_Fournisseur::post_type,
+			'post_author' => $post_author,
+			'meta_input' => $data,
+			'post_content' => '',
+		);
+		return wp_insert_post( $postarr, true );
+	}
+
+	/***********************************************************/
 	/**
 	 * Extend WordPress search to include custom fields
 	 *

@@ -12,12 +12,12 @@
  * Tags: 
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
- * Version: 1.0.6
+ * Version: 1.0.8
 */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'COOPESHOP_VERSION', '1.0.6' );
+define( 'COOPESHOP_VERSION', '1.0.8' );
 define( 'COOPESHOP_MINIMUM_WP_VERSION', '4.0' );
 
 define( 'COOPESHOP_PLUGIN', __FILE__ );

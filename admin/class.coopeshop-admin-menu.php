@@ -54,6 +54,34 @@ class CoopEShop_Admin_Menu {
 			]
 		);
 
+		// 
+		$field_id = 'fournisseur_register_form_id';
+		add_settings_field(
+			$field_id, 
+			__( 'Formulaire d\'inscription des fournisseurs', 'coopeshop' ),
+			array(__CLASS__, 'coopeshop_combos_contact_forms_cb'),
+			COOPESHOP_TAG,
+			'coopeshop_section_general',
+			[
+				'label_for' => $field_id,
+				'class' => 'coopeshop_row',
+			]
+		);
+
+		// 
+		$field_id = 'newsletter_register_form_id';
+		add_settings_field(
+			$field_id, 
+			__( 'Formulaire d\'inscription à la lettre-info', 'coopeshop' ),
+			array(__CLASS__, 'coopeshop_combos_contact_forms_cb'),
+			COOPESHOP_TAG,
+			'coopeshop_section_general',
+			[
+				'label_for' => $field_id,
+				'class' => 'coopeshop_row',
+			]
+		);
+
 		// register a new section in the "coopeshop" page
 		add_settings_section(
 			'coopeshop_section_fournisseurs',
@@ -265,7 +293,7 @@ class CoopEShop_Admin_Menu {
 	public static function remove_dashboard_widgets() {
 	    global $wp_meta_boxes, $current_user;
 	    /*var_dump($wp_meta_boxes['dashboard']);*/
-		if(!in_array('administrator',(array)$current_user->roles) ) {
+		if( ! in_array('administrator',(array)$current_user->roles) ) {
 			remove_meta_box( 'dashboard_quick_press', 'dashboard', 'side' );
 			remove_meta_box( 'dashboard_right_now', 'dashboard', 'normal' );
 		}

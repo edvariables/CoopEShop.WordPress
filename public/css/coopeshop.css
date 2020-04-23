@@ -92,3 +92,15 @@
 	padding: 20px 10px;
 }
 
+label.textarea-rows-2 textarea {
+	max-height: 5em;
+}
+label.textarea-rows-3 textarea {
+	max-height: 6em;
+}
+label.textarea-rows-4 textarea {
+	max-height: 7em;
+}
+label.textarea-rows-5 textarea {
+	max-height: 8em;
+}

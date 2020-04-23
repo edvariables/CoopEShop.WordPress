@@ -1,12 +1,12 @@
 TODO list
 ----------
 
-Tableau de bord, dashboard : accès direct à la page du fournisseur
+Menu CoopEShop : erreur depuis network admin.
+
+Dashboard : other blogs
 
 Génération automatique du menu hiérarchique par types de fournisseurs. 
 Arbre des types à gauche avec nombre de fournisseurs entre parenthèses
-
-Page "Tous les fournisseurs" : + Menu dispo dans l'interface Menus courante
 
 https://developer.wordpress.org/plugins/security/
 
@@ -14,7 +14,7 @@ Créer un rôle author-fournisseur
 
 Synchroniser les documentations depuis le site wp.coopeshop.net.
 
-Synchroniser les pages fournisseurs
+Synchroniser les pages de même fournisseur entre les sites : non mais afficher les liens d'édition vers les autres sites
 
 Publish plugin sur WordPress.org/plugins
 	https://wordpress.org/plugins/developers/add/
@@ -29,6 +29,9 @@ Doc new user
 API open street map
 
 Mutualiser etapecavalieredubalayn.fr
+
+Email new password : lien wp.coop... "Les sites de CoopEShop"
+La redirection est correctement gérée.
 
 *********
 Clean DB

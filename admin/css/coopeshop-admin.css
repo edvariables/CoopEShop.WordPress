@@ -30,6 +30,10 @@
 	margin-left: 1em;
 }
 
+.coop-metabox-row.description > label {
+	margin-top: 2px;
+}
+
 /* as other inputs */
 input[type="gps"] {
 	padding: 0 8px;

@@ -65,4 +65,25 @@ class CoopEShop_User {
 		return $user;
 	}
 
+	public static function get_blog_admin_id(){
+		$email = get_bloginfo('admin_email');
+		return null;
+	}
+
+	/**
+	 * Retourne un blog auquel appartient l'utilisateur et en priorité le blog en cours
+	 */
+	public static function get_current_or_default_blog_id($user){
+		$blog_id = get_current_blog_id();
+		if($user){
+			$blogs = get_blogs_of_user($user->ID);
+			if( ! array_key_exists($blog_id, $blogs))
+				foreach($blogs as $blog){
+					$blog_id = $blog->userblog_id;
+					break;
+				}
+		}
+		return $blog_id;
+	}
+
 }

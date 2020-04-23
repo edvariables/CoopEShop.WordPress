@@ -56,6 +56,12 @@ class CoopEShop {
 		if( WP_DEBUG && in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ) ) ) {
 			add_filter( 'wp_mail', array(__CLASS__, 'wp_mail_localhost'), 100, 1);
 		}
+		
+		//wpcf7_mail_sent formulaire inscription
+		add_filter( 'wpcf7_mail_sent', array(__CLASS__, 'wpcf7_mail_sent_register_form'), 10,1);
+		if( WP_DEBUG && in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ) ) ) {
+			add_filter( 'wpcf7_mail_failed', array(__CLASS__, 'wpcf7_mail_sent_register_form'), 10,1);
+		}
 
 		add_action( 'validate_password_reset', array(__CLASS__, 'validate_password_reset'), 100, 2 );
 	}
@@ -98,6 +104,24 @@ class CoopEShop {
 			$args['headers'] = sprintf('From: %s', get_bloginfo('admin_email'));
 		}
 	    return $args;
+	}
+
+	/**
+	 * Intercepte les emails de formulaires d'inscription
+	 */
+
+	public static function wpcf7_mail_sent_register_form($contact_form){
+
+		$form_id = $contact_form->id();
+
+		if($form_id == self::get_option('fournisseur_register_form_id')){
+			CoopEShop_Fournisseur::new_fournisseur($contact_form);
+		}
+		elseif($form_id == self::get_option('newsletter_register_form_id')){
+			
+		}		
+
+		return;
 	}
 
 	public static function load_plugin_textdomain() {
