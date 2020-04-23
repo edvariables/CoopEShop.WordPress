@@ -25,7 +25,7 @@ class CoopEShop_Admin_Menu {
 		//TODO
 		// Le hook admin_menu est avant le admin_init
 		//add_action( 'admin_menu', array( __CLASS__, 'init_admin_menu' ), 5 ); 
-		add_action('wp_dashboard_setup', array(__CLASS__, 'remove_dashboard_widgets') );
+		add_action('wp_dashboard_setup', array(__CLASS__, 'init_dashboard_widgets') );
 	}
 
 	public static function init_settings(){
@@ -287,6 +287,13 @@ class CoopEShop_Admin_Menu {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 *
+	 */
+	public static function init_dashboard_widgets() {
+	    self::remove_dashboard_widgets();
 	}
 
 	// TODO parametrage initiale pour chaque utilisateur

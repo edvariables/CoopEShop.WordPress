@@ -14,7 +14,7 @@ class CoopEShop_User {
 		
 		$user_id = email_exists( $email );
 		if($user_id){
-			return new WP_User( $user_id );
+			return self::promote_user_to_blog(new WP_User( $user_id ));
 		}
 
 		if(!$user_login) {
@@ -52,7 +52,7 @@ class CoopEShop_User {
 		// Set the role
 		$user = new WP_User( $user_id );
 		if($user) {
-			$user->set_role( 'author' );
+			$user->set_role( CoopEShop_Fournisseur::user_role );
 			/*if($user->Errors){
 
 			}
@@ -62,9 +62,43 @@ class CoopEShop_User {
 			}*/		
 		}
 		
+		return self::promote_user_to_blog($user);
+	}
+
+	private static function promote_user_to_blog( WP_User $user, $blog = false ){
+		if( ! $blog )
+			$blog_id = get_current_blog_id();
+		elseif(is_object($blog))//TODO
+			$blog_id = $blog->ID;
+		else //TODO
+			$blog_id = $blog;
+
+		//copie from wp-admin/user-new.php ligne 64
+		// Adding an existing user to this blog.
+		if ( ! array_key_exists( $blog_id, get_blogs_of_user( $user->ID ) ) ) {
+
+			if( current_user_can( 'promote_user', $user->ID )  ){
+				$result = add_existing_user_to_blog(
+					array(
+						'user_id' => $user->ID,
+						'role'    => CoopEShop_Fournisseur::user_role,
+					)
+				);
+				if(is_wp_error($result)){
+					CoopEShop_Admin::add_admin_notice( sprintf(__("L'utilisateur %s n'a pas accès à ce site web pour la raison suivante : %s", COOPESHOP_TAG), $user->display_name, $result->get_error_message()), 'error');
+				}
+				else {
+					CoopEShop_Admin::add_admin_notice( sprintf(__("Désormais, l'utilisateur %s a accès à ce site web en tant que fournisseur.", COOPESHOP_TAG), $user->display_name), 'success');
+				}
+			}
+			else{
+				CoopEShop_Admin::add_admin_notice( sprintf(__("L'utilisateur %s n'a pas accès à ce site web et vous n'avez pas l'autorisation de le lui accorder. Contactez un administrateur de niveau supérieur.", COOPESHOP_TAG), $user->display_name), 'warning');
+			}
+		}
 		return $user;
 	}
 
+	//TODO
 	public static function get_blog_admin_id(){
 		$email = get_bloginfo('admin_email');
 		return null;

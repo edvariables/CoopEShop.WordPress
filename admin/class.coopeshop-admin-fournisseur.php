@@ -170,6 +170,17 @@ class CoopEShop_Admin_Fournisseur {
 				array('fournisseurs' => $fournisseurs) );
 		}
 
+	    $blogs = CoopEShop_Admin_Multisite::get_other_blogs_of_user();
+		if( count($blogs) ) {
+			add_meta_box( 'dashboard_my_blogs',
+				__('Mes autres sites CoopEShop', COOPESHOP_TAG),
+				array(__CLASS__, 'dashboard_my_blogs_cb'),
+				'dashboard',
+				'normal',
+				'high',
+				array('blogs' => $blogs) );
+		}
+
 		if(current_user_can('manage_options')){
 		    $fournisseurs = self::get_posts();
 			if( count($fournisseurs) ) {
@@ -182,6 +193,24 @@ class CoopEShop_Admin_Fournisseur {
 					array('fournisseurs' => $fournisseurs) );
 			}
 		}
+	}
+
+	/**
+	 * Callback
+	 */
+	public static function dashboard_my_blogs_cb($post , $widget) {
+		$blogs = $widget['args']['blogs'];
+		?><ul><?php
+		foreach($blogs as $blog){
+			//;
+			echo '<li>';
+			?><header class="entry-header"><?php 
+				echo sprintf('<h3 class="entry-title"><a href="%s/wp-admin">%s</a></h3>', $blog->siteurl, $blog->blogname);
+			?></header><?php
+			echo '</li>';
+			
+		}
+		?></ul><?php
 	}
 
 	/**

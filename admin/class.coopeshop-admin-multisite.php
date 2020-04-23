@@ -4,35 +4,42 @@ class CoopEShop_Admin_Multisite {
 	public static function init() {
 	}
 
-	public static function get_other_blogs_of_user ($user_id){
+	public static function get_other_blogs_of_user ($user_id = false){
+		if( ! $user_id )
+			$user_id = get_current_user_id();
 		$current_blog_id = get_current_blog_id();
 		$blogs = get_blogs_of_user($user_id);
 		if(isset($blogs[$current_blog_id]))
 			unset($blogs[$current_blog_id]);
 
-		/*if( WP_DEBUG ) { //TODO delete
+		if( WP_DEBUG ) { //TODO delete
 			$blogs = array();
 			$blogId= 3;
 			$blogs[$blogId] = new stdClass();
 			$blogs[$blogId]->userblog_id = $blogId;
 			$blogs[$blogId]->blogname = 'CoopEShop de DEV';
+			$blogs[$blogId]->siteurl = site_url();
 			$blogId++;
 			$blogs[$blogId] = new stdClass();
 			$blogs[$blogId]->userblog_id = $blogId;
 			$blogs[$blogId]->blogname = 'CoopEShop du Pays de Saint-Félicien';
+			$blogs[$blogId]->siteurl = site_url('pays-de-saint-felicien');
 			$blogId++;
 			$blogs[$blogId] = new stdClass();
 			$blogs[$blogId]->userblog_id = $blogId;
 			$blogs[$blogId]->blogname = 'CoopEShop des Monts d\'Ardèche';
+			$blogs[$blogId]->siteurl = site_url('monts-d-ardeche');
 			$blogId++;
 			$blogs[$blogId] = new stdClass();
 			$blogs[$blogId]->userblog_id = $blogId;
 			$blogs[$blogId]->blogname = 'CoopEShop des Monts du Lyonnais';
+			$blogs[$blogId]->siteurl = site_url('monts-du-lyonnais');
 			$blogId++;
 			$blogs[$blogId] = new stdClass();
 			$blogs[$blogId]->userblog_id = $blogId;
-			$blogs[$blogId]->blogname = 'CoopEShop du Pays de Lamatres';
-		}*/
+			$blogs[$blogId]->blogname = 'CoopEShop du Pays de Lamastres';
+			$blogs[$blogId]->siteurl = site_url('pays-de-lamastre');
+		}
 		return $blogs;
 	}
 
@@ -47,6 +54,7 @@ class CoopEShop_Admin_Multisite {
 		}
 	}
 
+	//TODO
 	public static function synchronise_to_other_blog ($post_id, $post, $is_update, $to_blog){
 		global $wpdb;
 		$src_prefix = $wpdb->base_prefix;

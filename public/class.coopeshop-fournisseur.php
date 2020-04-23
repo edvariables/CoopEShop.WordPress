@@ -17,6 +17,8 @@ class CoopEShop_Fournisseur {
 	const post_type = 'fournisseur';
 	const taxonomy_type_fournisseur = 'type_fournisseur';
 
+	const user_role = 'author';
+
 	private static $initiated = false;
 
 	public static function init() {
